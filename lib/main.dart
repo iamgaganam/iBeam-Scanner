@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'screens/home_screen.dart';
 import 'screens/dashboard_screen.dart';
 import 'screens/settings_screen.dart';
+import 'screens/login_screen.dart';
+import 'screens/setup_permission_screen.dart';
+import 'screens/refined_alerts_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -22,6 +25,9 @@ class MyApp extends StatelessWidget {
         '/': (context) => const HomeScreen(),
         '/dashboard': (context) => const DashboardScreen(),
         '/settings': (context) => const SettingsScreen(),
+        '/login': (context) => const LoginScreen(),
+        '/setup_permission': (context) => const SetupPermissionScreen(),
+        '/refined_alerts': (context) => const RefinedAlertsScreen(),
       },
     );
   }
