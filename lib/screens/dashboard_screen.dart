@@ -67,41 +67,6 @@ class _DashboardScreenState extends State<DashboardScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF0F2F5),
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: Padding(
-          padding: const EdgeInsets.only(left: 16),
-          child: CircleAvatar(
-            radius: 18,
-            backgroundColor: const Color(0xFFFFCCCC),
-            child: const Icon(Icons.person, color: Color(0xFFCC6666), size: 20),
-          ),
-        ),
-        title: const Text(
-          'Proximity Aware',
-          style: TextStyle(
-            color: Color(0xFF111111),
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        centerTitle: true,
-        actions: [
-          const Icon(
-            Icons.settings_input_antenna,
-            color: Color(0xFF555555),
-            size: 22,
-          ),
-          const SizedBox(width: 16),
-          const Icon(Icons.logout, color: Color(0xFF555555), size: 22),
-          const SizedBox(width: 16),
-        ],
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(1),
-          child: Container(height: 1, color: const Color(0xFFE8E7E3)),
-        ),
-      ),
       body: Stack(
         children: [
           SingleChildScrollView(
@@ -223,9 +188,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                       const SizedBox(height: 16),
 
                       // Beacon Cards
-                      ..._beacons
-                          .map((beacon) => _buildBeaconCard(beacon))
-                          .toList(),
+                      ..._beacons.map((beacon) => _buildBeaconCard(beacon)),
                     ],
                   ),
                 ),
@@ -235,7 +198,7 @@ class _DashboardScreenState extends State<DashboardScreen>
 
           // FAB
           Positioned(
-            bottom: 90,
+            bottom: 20,
             right: 20,
             child: Container(
               width: 52,
@@ -245,7 +208,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                 borderRadius: BorderRadius.circular(14),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF1E3A9F).withOpacity(0.35),
+                    color: const Color(0xFF1E3A9F).withValues(alpha: 0.35),
                     blurRadius: 12,
                     offset: const Offset(0, 4),
                   ),
@@ -256,8 +219,6 @@ class _DashboardScreenState extends State<DashboardScreen>
           ),
         ],
       ),
-
-      bottomNavigationBar: _buildBottomNav(),
     );
   }
 
@@ -276,7 +237,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                 height: 110,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: const Color(0xFF1E3A9F).withOpacity(0.10),
+                  color: const Color(0xFF1E3A9F).withValues(alpha: 0.10),
                 ),
               ),
             ),
@@ -553,113 +514,6 @@ class _DashboardScreenState extends State<DashboardScreen>
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildBottomNav() {
-    return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        border: Border(top: BorderSide(color: Color(0xFFE8E7E3))),
-      ),
-      padding: const EdgeInsets.symmetric(vertical: 10),
-      child: Row(
-        children: [
-          // SCAN - active
-          Expanded(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 10,
-                  ),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF1E3A9F),
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child: const Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.my_location, color: Colors.white, size: 20),
-                      SizedBox(width: 6),
-                      Text(
-                        'SCAN',
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white,
-                          letterSpacing: 0.8,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          // ALERTS
-          Expanded(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    const Icon(
-                      Icons.notifications_outlined,
-                      color: Color(0xFF888888),
-                      size: 24,
-                    ),
-                    Positioned(
-                      top: -2,
-                      right: -2,
-                      child: Container(
-                        width: 8,
-                        height: 8,
-                        decoration: const BoxDecoration(
-                          color: Colors.red,
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 4),
-                const Text(
-                  'ALERTS',
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF888888),
-                    letterSpacing: 0.8,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          // PROFILE
-          Expanded(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: const [
-                Icon(Icons.person_outline, color: Color(0xFF888888), size: 24),
-                SizedBox(height: 4),
-                Text(
-                  'PROFILE',
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF888888),
-                    letterSpacing: 0.8,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
       ),
     );
   }

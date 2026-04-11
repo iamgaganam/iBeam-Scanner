@@ -7,39 +7,6 @@ class RefinedAlertsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF2F1EF),
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        titleSpacing: 20,
-        title: Row(
-          children: const [
-            Icon(
-              Icons.settings_input_antenna,
-              color: Color(0xFF1E3A9F),
-              size: 20,
-            ),
-            SizedBox(width: 10),
-            Text(
-              'Alerts',
-              style: TextStyle(
-                color: Color(0xFF111111),
-                fontSize: 20,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 18),
-            child: Icon(Icons.tune, color: Color(0xFF555555), size: 22),
-          ),
-        ],
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(1),
-          child: Container(height: 1, color: const Color(0xFFE8E7E3)),
-        ),
-      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 20),
         child: Column(
@@ -172,7 +139,6 @@ class RefinedAlertsScreen extends StatelessWidget {
           ],
         ),
       ),
-      bottomNavigationBar: _buildBottomNav(),
     );
   }
 
@@ -431,94 +397,6 @@ class RefinedAlertsScreen extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildBottomNav() {
-    return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        border: Border(top: BorderSide(color: Color(0xFFE8E7E3))),
-      ),
-      padding: const EdgeInsets.symmetric(vertical: 10),
-      child: Row(
-        children: [
-          // SCAN
-          Expanded(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: const [
-                Icon(
-                  Icons.my_location_outlined,
-                  color: Color(0xFF888888),
-                  size: 24,
-                ),
-                SizedBox(height: 4),
-                Text(
-                  'Scan',
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF888888),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          // ALERTS - active
-          Expanded(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 10,
-                  ),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF1E3A9F),
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child: const Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.notifications, color: Colors.white, size: 20),
-                      SizedBox(width: 6),
-                      Text(
-                        'Alerts',
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white,
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          // PROFILE
-          Expanded(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: const [
-                Icon(Icons.person_outline, color: Color(0xFF888888), size: 24),
-                SizedBox(height: 4),
-                Text(
-                  'Profile',
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF888888),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
       ),
     );
   }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/custom_button.dart';
 
 class SetupPermissionScreen extends StatefulWidget {
   const SetupPermissionScreen({super.key});
@@ -109,40 +110,18 @@ class _SetupPermissionScreenState extends State<SetupPermissionScreen> {
               child: Column(
                 children: [
                   // Grant Permissions Button
-                  SizedBox(
-                    width: double.infinity,
-                    height: 58,
-                    child: ElevatedButton(
-                      onPressed: () {},
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF1E3A9F),
-                        foregroundColor: Colors.white,
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                      ),
-                      child: const Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            'Grant Permissions',
-                            style: TextStyle(
-                              fontSize: 17,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.white,
-                              letterSpacing: 0.2,
-                            ),
-                          ),
-                          SizedBox(width: 10),
-                          Icon(
-                            Icons.arrow_forward,
-                            color: Colors.white,
-                            size: 20,
-                          ),
-                        ],
-                      ),
-                    ),
+                  CustomButton(
+                    label: 'Grant Permissions',
+                    backgroundColor: const Color(0xFF1E3A9F),
+                    foregroundColor: Colors.white,
+                    icon: Icons.arrow_forward,
+                    onPressed: () {
+                      Navigator.pushNamedAndRemoveUntil(
+                        context,
+                        '/main',
+                        (route) => false,
+                      );
+                    },
                   ),
 
                   const SizedBox(height: 16),
@@ -188,7 +167,7 @@ class _SetupPermissionScreenState extends State<SetupPermissionScreen> {
         borderRadius: BorderRadius.circular(36),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.07),
+            color: Colors.black.withValues(alpha: 0.07),
             blurRadius: 30,
             offset: const Offset(0, 10),
           ),
@@ -246,7 +225,7 @@ class _SetupPermissionScreenState extends State<SetupPermissionScreen> {
           Switch(
             value: value,
             onChanged: onChanged,
-            activeColor: Colors.white,
+            activeThumbColor: Colors.white,
             activeTrackColor: const Color(0xFF1E3A9F),
             inactiveThumbColor: Colors.white,
             inactiveTrackColor: const Color(0xFFCCCCCC),

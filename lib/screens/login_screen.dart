@@ -1,28 +1,8 @@
 import 'package:flutter/material.dart';
-
-void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Proximity Aware',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        fontFamily: 'SF Pro Display',
-        scaffoldBackgroundColor: const Color(0xFFF2F1EF),
-      ),
-      home: const LoginScreen(),
-    );
-  }
-}
+import '../widgets/custom_button.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+  const LoginScreen({super.key});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -138,7 +118,7 @@ class _LoginScreenState extends State<LoginScreen> {
               width: 22,
               height: 22,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.25),
+                color: Colors.white.withValues(alpha: 0.25),
                 shape: BoxShape.circle,
               ),
               child: const Icon(
@@ -154,71 +134,27 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Widget _buildAppleButton() {
-    return SizedBox(
-      width: double.infinity,
-      height: 58,
-      child: ElevatedButton(
-        onPressed: () {},
-        style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF111111),
-          foregroundColor: Colors.white,
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: const [
-            Icon(Icons.apple, color: Colors.white, size: 22),
-            SizedBox(width: 10),
-            Text(
-              'Sign in with Apple',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
-                letterSpacing: 0.2,
-              ),
-            ),
-          ],
-        ),
-      ),
+    return CustomButton(
+      label: 'Sign in with Apple',
+      icon: Icons.apple,
+      backgroundColor: const Color(0xFF111111),
+      foregroundColor: Colors.white,
+      onPressed: () {
+        Navigator.pushNamed(context, '/setup_permission');
+      },
     );
   }
 
   Widget _buildGoogleButton() {
-    return SizedBox(
-      width: double.infinity,
-      height: 58,
-      child: OutlinedButton(
-        onPressed: () {},
-        style: OutlinedButton.styleFrom(
-          backgroundColor: Colors.white,
-          foregroundColor: const Color(0xFF111111),
-          elevation: 0,
-          side: const BorderSide(color: Color(0xFFE0DFDC), width: 1.2),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            _buildGoogleLogo(),
-            const SizedBox(width: 10),
-            const Text(
-              'Sign in with Google',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFF111111),
-                letterSpacing: 0.2,
-              ),
-            ),
-          ],
-        ),
-      ),
+    return CustomButton(
+      label: 'Sign in with Google',
+      customIcon: _buildGoogleLogo(),
+      backgroundColor: Colors.white,
+      foregroundColor: const Color(0xFF111111),
+      outlined: true,
+      onPressed: () {
+        Navigator.pushNamed(context, '/setup_permission');
+      },
     );
   }
 

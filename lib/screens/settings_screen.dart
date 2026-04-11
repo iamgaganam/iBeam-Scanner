@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../widgets/stat_card.dart';
+import '../widgets/custom_button.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -7,40 +9,6 @@ class SettingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF2F1EF),
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: Padding(
-          padding: const EdgeInsets.only(left: 16),
-          child: CircleAvatar(
-            radius: 18,
-            backgroundColor: const Color(0xFFDDDDDD),
-            child: const Icon(Icons.person, color: Colors.white, size: 20),
-          ),
-        ),
-        title: const Text(
-          'Proximity Aware',
-          style: TextStyle(
-            color: Color(0xFF111111),
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 16),
-            child: Icon(
-              Icons.settings_input_antenna,
-              color: Color(0xFF888888),
-              size: 22,
-            ),
-          ),
-        ],
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(1),
-          child: Container(height: 1, color: const Color(0xFFE8E7E3)),
-        ),
-      ),
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -73,19 +41,19 @@ class SettingsScreen extends StatelessWidget {
                   // Stats Row
                   Row(
                     children: [
-                      Expanded(
-                        child: _buildStatCard(
+                      const Expanded(
+                        child: StatCard(
                           label: 'ACTIVE NODES',
                           value: '12',
-                          valueColor: const Color(0xFF1E3A9F),
+                          valueColor: Color(0xFF1E3A9F),
                         ),
                       ),
                       const SizedBox(width: 14),
-                      Expanded(
-                        child: _buildStatCard(
+                      const Expanded(
+                        child: StatCard(
                           label: 'SIGNAL HEALTH',
                           value: '98%',
-                          valueColor: const Color(0xFF8B6F00),
+                          valueColor: Color(0xFF8B6F00),
                         ),
                       ),
                     ],
@@ -153,7 +121,19 @@ class SettingsScreen extends StatelessWidget {
                   const SizedBox(height: 16),
 
                   // Sign Out Button
-                  _buildSignOutButton(),
+                  CustomButton(
+                    label: 'Sign Out',
+                    icon: Icons.logout,
+                    backgroundColor: const Color(0xFFFFEDED),
+                    foregroundColor: const Color(0xFFCC2222),
+                    onPressed: () {
+                      Navigator.pushNamedAndRemoveUntil(
+                        context,
+                        '/login',
+                        (route) => false,
+                      );
+                    },
+                  ),
 
                   const SizedBox(height: 16),
 
@@ -177,9 +157,6 @@ class SettingsScreen extends StatelessWidget {
           ],
         ),
       ),
-
-      // Bottom Navigation Bar
-      bottomNavigationBar: _buildBottomNav(),
     );
   }
 
@@ -237,44 +214,6 @@ class SettingsScreen extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildStatCard({
-    required String label,
-    required String value,
-    required Color valueColor,
-  }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF8F8F6),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFE8E7E3)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label,
-            style: const TextStyle(
-              fontSize: 10,
-              fontWeight: FontWeight.w600,
-              color: Color(0xFFAAAAAA),
-              letterSpacing: 1.1,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 30,
-              fontWeight: FontWeight.bold,
-              color: valueColor,
-            ),
-          ),
-        ],
-      ),
     );
   }
 
@@ -351,7 +290,7 @@ class SettingsScreen extends StatelessWidget {
             width: 46,
             height: 46,
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.25),
+              color: Colors.white.withValues(alpha: 0.25),
               shape: BoxShape.circle,
             ),
             child: const Icon(Icons.my_location, color: Colors.white, size: 24),
@@ -382,111 +321,6 @@ class SettingsScreen extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildSignOutButton() {
-    return Container(
-      width: double.infinity,
-      height: 58,
-      decoration: BoxDecoration(
-        color: const Color(0xFFFFEDED),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: TextButton(
-        onPressed: () {},
-        style: TextButton.styleFrom(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-        ),
-        child: const Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.logout, color: Color(0xFFCC2222), size: 20),
-            SizedBox(width: 10),
-            Text(
-              'Sign Out',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFFCC2222),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildBottomNav() {
-    return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        border: Border(top: BorderSide(color: Color(0xFFE8E7E3))),
-      ),
-      padding: const EdgeInsets.symmetric(vertical: 10),
-      child: Row(
-        children: [
-          Expanded(
-            child: _buildNavItem(Icons.my_location_outlined, 'SCAN', false),
-          ),
-          Expanded(
-            child: _buildNavItem(Icons.notifications_outlined, 'ALERTS', false),
-          ),
-          Expanded(child: _buildNavItemActive()),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildNavItem(IconData icon, String label, bool active) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icon, color: const Color(0xFF888888), size: 24),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 10,
-            fontWeight: FontWeight.w600,
-            color: Color(0xFF888888),
-            letterSpacing: 0.8,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildNavItemActive() {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
-          decoration: BoxDecoration(
-            color: const Color(0xFF1E3A9F),
-            borderRadius: BorderRadius.circular(14),
-          ),
-          child: const Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.person_outline, color: Colors.white, size: 22),
-              SizedBox(width: 6),
-              Text(
-                'PROFILE',
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.white,
-                  letterSpacing: 0.8,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
     );
   }
 }

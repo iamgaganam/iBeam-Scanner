@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'screens/home_screen.dart';
+import 'screens/main_layout.dart';
 import 'screens/dashboard_screen.dart';
 import 'screens/settings_screen.dart';
 import 'screens/login_screen.dart';
@@ -16,13 +16,32 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'iBeam Scanner',
+      title: 'Proximity Aware',
+      debugShowCheckedModeBanner: false,
+      builder: (context, child) {
+        return ScrollConfiguration(
+          behavior: const MaterialScrollBehavior().copyWith(
+            physics: const BouncingScrollPhysics(
+              parent: AlwaysScrollableScrollPhysics(),
+            ),
+          ),
+          child: child!,
+        );
+      },
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        fontFamily: 'SF Pro Display',
+        scaffoldBackgroundColor: const Color(0xFFF2F1EF),
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF1E3A9F)),
+        pageTransitionsTheme: const PageTransitionsTheme(
+          builders: {
+            TargetPlatform.android: CupertinoPageTransitionsBuilder(),
+            TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+          },
+        ),
       ),
-      initialRoute: '/',
+      initialRoute: '/login',
       routes: {
-        '/': (context) => const HomeScreen(),
+        '/main': (context) => const MainLayout(),
         '/dashboard': (context) => const DashboardScreen(),
         '/settings': (context) => const SettingsScreen(),
         '/login': (context) => const LoginScreen(),
