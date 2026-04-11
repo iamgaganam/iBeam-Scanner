@@ -7,7 +7,13 @@ environment:
   sdk: ^3.11.4
 
 dependencies:
+  flutter:
+    sdk: flutter
+  flutter_blue_plus: ^1.35.5
+  permission_handler: ^11.4.0
   meta: ^1.12.0
 
 dev_dependencies:
   lints: ^6.0.0
+
+flutter:

@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
-import '../../../../app/routes/app_routes.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
 import '../../../../core/presentation/widgets/custom_button.dart';
+import '../bloc/permission_bloc.dart';
+import '../bloc/permission_event.dart';
+import '../bloc/permission_state.dart';
 
 class SetupPermissionScreen extends StatefulWidget {
   const SetupPermissionScreen({super.key});
@@ -10,151 +14,196 @@ class SetupPermissionScreen extends StatefulWidget {
 }
 
 class _SetupPermissionScreenState extends State<SetupPermissionScreen> {
-  bool _locationEnabled = true;
-  bool _bluetoothEnabled = false;
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF2F1EF),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFFF2F1EF),
-        elevation: 0,
-        leading: GestureDetector(
-          onTap: () => Navigator.maybePop(context),
-          child: const Padding(
-            padding: EdgeInsets.only(left: 16),
-            child: Icon(Icons.arrow_back, color: Color(0xFF1E3A9F), size: 24),
-          ),
-        ),
-        title: const Text(
-          'Setup',
-          style: TextStyle(
-            color: Color(0xFF111111),
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        titleSpacing: 4,
-      ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    const SizedBox(height: 24),
+    return BlocListener<PermissionBloc, PermissionState>(
+      listenWhen: (PermissionState previous, PermissionState current) =>
+          previous.status != current.status,
+      listener: (BuildContext context, PermissionState state) {
+        if (state.status == PermissionFlowStatus.error &&
+            state.errorMessage != null) {
+          ScaffoldMessenger.of(context)
+            ..hideCurrentSnackBar()
+            ..showSnackBar(SnackBar(content: Text(state.errorMessage!)));
+        }
+      },
+      child: Builder(
+        builder: (BuildContext context) {
+          final PermissionState permissionState = context
+              .watch<PermissionBloc>()
+              .state;
+          final bool isLoading =
+              permissionState.status == PermissionFlowStatus.loading;
+          final bool locationEnabled =
+              permissionState.snapshot?.hasLocationPermission ?? false;
+          final bool bluetoothEnabled =
+              permissionState.snapshot?.hasBluetoothPermission ?? false;
 
-                    // Radar Icon Card
-                    _buildRadarCard(),
-
-                    const SizedBox(height: 40),
-
-                    // Title
-                    const Text(
-                      'Precision is key',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF111111),
-                      ),
-                    ),
-
-                    const SizedBox(height: 14),
-
-                    // Subtitle
-                    const Text(
-                      'To accurately detect proximity and keep your environment secure, we need a few keys to the kingdom.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 15,
-                        color: Color(0xFF888888),
-                        height: 1.6,
-                      ),
-                    ),
-
-                    const SizedBox(height: 36),
-
-                    // Location Toggle
-                    _buildToggleCard(
-                      title: 'Enable Location Services (Always)',
-                      subtitle: 'Required for background awareness',
-                      value: _locationEnabled,
-                      onChanged: (val) =>
-                          setState(() => _locationEnabled = val),
-                    ),
-
-                    const SizedBox(height: 12),
-
-                    // Bluetooth Toggle
-                    _buildToggleCard(
-                      title: 'Enable Bluetooth Scan',
-                      subtitle: 'Detects nearby trusted devices',
-                      value: _bluetoothEnabled,
-                      onChanged: (val) =>
-                          setState(() => _bluetoothEnabled = val),
-                    ),
-
-                    const SizedBox(height: 28),
-                  ],
-                ),
-              ),
-            ),
-
-            // Bottom section
-            Padding(
-              padding: const EdgeInsets.fromLTRB(24, 0, 24, 8),
-              child: Column(
-                children: [
-                  // Grant Permissions Button
-                  CustomButton(
-                    label: 'Grant Permissions',
-                    backgroundColor: const Color(0xFF1E3A9F),
-                    foregroundColor: Colors.white,
-                    icon: Icons.arrow_forward,
-                    onPressed: () {
-                      Navigator.pushNamedAndRemoveUntil(
-                        context,
-                        AppRoutes.main,
-                        (route) => false,
-                      );
-                    },
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  // Encrypted label
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: const [
-                      Icon(
-                        Icons.lock_outline,
-                        size: 13,
-                        color: Color(0xFFAAAAAA),
-                      ),
-                      SizedBox(width: 6),
-                      Text(
-                        'DATA IS ENCRYPTED AND STORED LOCALLY',
-                        style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w600,
-                          color: Color(0xFFAAAAAA),
-                          letterSpacing: 1.1,
+          return Stack(
+            children: [
+              AbsorbPointer(
+                absorbing: isLoading,
+                child: Scaffold(
+                  backgroundColor: const Color(0xFFF2F1EF),
+                  appBar: AppBar(
+                    backgroundColor: const Color(0xFFF2F1EF),
+                    elevation: 0,
+                    leading: GestureDetector(
+                      onTap: () => Navigator.maybePop(context),
+                      child: const Padding(
+                        padding: EdgeInsets.only(left: 16),
+                        child: Icon(
+                          Icons.arrow_back,
+                          color: Color(0xFF1E3A9F),
+                          size: 24,
                         ),
                       ),
-                    ],
+                    ),
+                    title: const Text(
+                      'Setup',
+                      style: TextStyle(
+                        color: Color(0xFF111111),
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    titleSpacing: 4,
                   ),
+                  body: SafeArea(
+                    child: Column(
+                      children: [
+                        Expanded(
+                          child: SingleChildScrollView(
+                            padding: const EdgeInsets.symmetric(horizontal: 24),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                const SizedBox(height: 24),
 
-                  const SizedBox(height: 12),
-                ],
+                                // Radar Icon Card
+                                _buildRadarCard(),
+
+                                const SizedBox(height: 40),
+
+                                // Title
+                                const Text(
+                                  'Precision is key',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: 28,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xFF111111),
+                                  ),
+                                ),
+
+                                const SizedBox(height: 14),
+
+                                // Subtitle
+                                const Text(
+                                  'To accurately detect proximity and keep your environment secure, we need a few keys to the kingdom.',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    color: Color(0xFF888888),
+                                    height: 1.6,
+                                  ),
+                                ),
+
+                                const SizedBox(height: 36),
+
+                                // Location Toggle
+                                _buildToggleCard(
+                                  title: 'Enable Location Services (Always)',
+                                  subtitle: 'Required for background awareness',
+                                  value: locationEnabled,
+                                  onChanged: (_) {
+                                    context.read<PermissionBloc>().add(
+                                      const PermissionRequestSubmitted(),
+                                    );
+                                  },
+                                ),
+
+                                const SizedBox(height: 12),
+
+                                // Bluetooth Toggle
+                                _buildToggleCard(
+                                  title: 'Enable Bluetooth Scan',
+                                  subtitle: 'Detects nearby trusted devices',
+                                  value: bluetoothEnabled,
+                                  onChanged: (_) {
+                                    context.read<PermissionBloc>().add(
+                                      const PermissionRequestSubmitted(),
+                                    );
+                                  },
+                                ),
+
+                                const SizedBox(height: 28),
+                              ],
+                            ),
+                          ),
+                        ),
+
+                        // Bottom section
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(24, 0, 24, 8),
+                          child: Column(
+                            children: [
+                              // Grant Permissions Button
+                              CustomButton(
+                                label: 'Grant Permissions',
+                                backgroundColor: const Color(0xFF1E3A9F),
+                                foregroundColor: Colors.white,
+                                icon: Icons.arrow_forward,
+                                onPressed: () {
+                                  context.read<PermissionBloc>().add(
+                                    const PermissionRequestSubmitted(),
+                                  );
+                                },
+                              ),
+
+                              const SizedBox(height: 16),
+
+                              // Encrypted label
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: const [
+                                  Icon(
+                                    Icons.lock_outline,
+                                    size: 13,
+                                    color: Color(0xFFAAAAAA),
+                                  ),
+                                  SizedBox(width: 6),
+                                  Text(
+                                    'DATA IS ENCRYPTED AND STORED LOCALLY',
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w600,
+                                      color: Color(0xFFAAAAAA),
+                                      letterSpacing: 1.1,
+                                    ),
+                                  ),
+                                ],
+                              ),
+
+                              const SizedBox(height: 12),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ),
-            ),
-          ],
-        ),
+              if (isLoading)
+                const Positioned.fill(
+                  child: ColoredBox(
+                    color: Color(0xAAFFFFFF),
+                    child: Center(child: CircularProgressIndicator()),
+                  ),
+                ),
+            ],
+          );
+        },
       ),
     );
   }

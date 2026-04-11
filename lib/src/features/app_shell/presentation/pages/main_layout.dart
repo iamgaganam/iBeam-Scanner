@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
 import '../../../alerts/presentation/pages/refined_alerts_screen.dart';
+import '../../../auth/presentation/bloc/auth_bloc.dart';
+import '../../../auth/presentation/bloc/auth_event.dart';
 import '../../../beacon_scanner/presentation/pages/dashboard_screen.dart';
 import '../../../settings/presentation/pages/settings_screen.dart';
 import '../widgets/custom_bottom_nav.dart';
@@ -55,6 +59,9 @@ class _MainLayoutState extends State<MainLayout>
       appBar: CustomAppBar(
         currentIndex: _currentIndex,
         onTapTab: _onTabChanged,
+        onLogout: () {
+          context.read<AuthBloc>().add(const AuthSignOutRequested());
+        },
       ),
       body: FadeTransition(
         opacity: _fadeController,

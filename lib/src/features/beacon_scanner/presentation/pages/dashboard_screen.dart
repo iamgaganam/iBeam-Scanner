@@ -1,4 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../../domain/entities/beacon_device.dart';
+import '../bloc/beacon_scanner_bloc.dart';
+import '../bloc/beacon_scanner_event.dart';
+import '../bloc/beacon_scanner_state.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -8,46 +14,15 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   late AnimationController _pulseController;
   late Animation<double> _pulseAnimation;
-
-  final List<Map<String, dynamic>> _beacons = [
-    {
-      'name': 'Conference Room B',
-      'uuid': '550E8400-E29B-41D4...',
-      'majorId': '1002',
-      'minorId': '45',
-      'distance': '4.1',
-      'critical': true,
-      'icon': Icons.location_on,
-      'iconColor': Color(0xFFFFAA00),
-    },
-    {
-      'name': 'Asset Tag: #A882',
-      'uuid': 'B12F6710-C90A-33B2...',
-      'majorId': '501',
-      'minorId': '8',
-      'distance': '7.2',
-      'critical': false,
-      'icon': Icons.bluetooth_disabled,
-      'iconColor': Color(0xFF888888),
-    },
-    {
-      'name': 'Server Hall 4 Gateway',
-      'uuid': '2A123C40-991A-4F11...',
-      'majorId': '200',
-      'minorId': '124',
-      'distance': '15.8',
-      'critical': false,
-      'icon': Icons.print_outlined,
-      'iconColor': Color(0xFF888888),
-    },
-  ];
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+
     _pulseController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 2),
@@ -55,177 +30,221 @@ class _DashboardScreenState extends State<DashboardScreen>
     _pulseAnimation = Tween<double>(begin: 0.85, end: 1.0).animate(
       CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
     );
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<BeaconScannerBloc>().add(
+        const BeaconScannerStartRequested(),
+      );
+    });
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _pulseController.dispose();
     super.dispose();
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    final bool isBackground = state != AppLifecycleState.resumed;
+    context.read<BeaconScannerBloc>().add(
+      BeaconScannerLifecycleChanged(isBackground: isBackground),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF0F2F5),
-      body: Stack(
-        children: [
-          SingleChildScrollView(
-            padding: const EdgeInsets.only(bottom: 100),
-            child: Column(
-              children: [
-                // Top Hero Section
-                Container(
-                  color: Colors.white,
-                  width: double.infinity,
-                  padding: const EdgeInsets.fromLTRB(24, 32, 24, 32),
-                  child: Column(
-                    children: [
-                      // Animated Radar Icon
-                      _buildRadarIcon(),
-                      const SizedBox(height: 20),
-                      // Status label
-                      const Text(
-                        'STATUS: ACTIVE',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
-                          color: Color(0xFF1E3A9F),
-                          letterSpacing: 1.4,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      // Title
-                      const Text(
-                        'Precision Scanning',
-                        style: TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF111111),
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      // Subtitle
-                      const Text(
-                        'Actively monitoring Bluetooth Low Energy\nsignals in your immediate perimeter.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Color(0xFF888888),
-                          height: 1.55,
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      // Stats Row
-                      Row(
+    return BlocBuilder<BeaconScannerBloc, BeaconScannerState>(
+      builder: (BuildContext context, BeaconScannerState state) {
+        final List<BeaconDevice> beacons = state.beacons;
+
+        return Scaffold(
+          backgroundColor: const Color(0xFFF0F2F5),
+          body: Stack(
+            children: [
+              SingleChildScrollView(
+                padding: const EdgeInsets.only(bottom: 100),
+                child: Column(
+                  children: [
+                    // Top Hero Section
+                    Container(
+                      color: Colors.white,
+                      width: double.infinity,
+                      padding: const EdgeInsets.fromLTRB(24, 32, 24, 32),
+                      child: Column(
                         children: [
-                          Expanded(child: _buildActiveNodesCard()),
-                          const SizedBox(width: 14),
-                          Expanded(child: _buildRSSICard()),
+                          // Animated Radar Icon
+                          _buildRadarIcon(),
+                          const SizedBox(height: 20),
+                          // Status label
+                          Text(
+                            _statusLabel(state),
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                              color: _statusColor(state),
+                              letterSpacing: 1.4,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          // Title
+                          const Text(
+                            'Precision Scanning',
+                            style: TextStyle(
+                              fontSize: 28,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF111111),
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          // Subtitle
+                          Text(
+                            _subtitle(state),
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: Color(0xFF888888),
+                              height: 1.55,
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                          // Stats Row
+                          Row(
+                            children: [
+                              Expanded(
+                                child: _buildActiveNodesCard(state.activeNodes),
+                              ),
+                              const SizedBox(width: 14),
+                              Expanded(
+                                child: _buildRSSICard(state.strongestRssi),
+                              ),
+                            ],
+                          ),
                         ],
                       ),
-                    ],
-                  ),
-                ),
+                    ),
 
-                const SizedBox(height: 16),
+                    const SizedBox(height: 16),
 
-                // Detected Beacons Section
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Section header
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.end,
+                    // Detected Beacons Section
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                          // Section header
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
-                              Text(
-                                'Detected Beacons',
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                  color: Color(0xFF111111),
-                                ),
+                              const Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Detected Beacons',
+                                    style: TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                      color: Color(0xFF111111),
+                                    ),
+                                  ),
+                                  SizedBox(height: 2),
+                                  Text(
+                                    'Nearby localized identifiers',
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      color: Color(0xFF888888),
+                                    ),
+                                  ),
+                                ],
                               ),
-                              SizedBox(height: 2),
-                              Text(
-                                'Nearby localized identifiers',
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  color: Color(0xFF888888),
+                              const Spacer(),
+                              GestureDetector(
+                                onTap: () {
+                                  context.read<BeaconScannerBloc>().add(
+                                    const BeaconScannerRefreshRequested(),
+                                  );
+                                },
+                                child: const Row(
+                                  children: [
+                                    Text(
+                                      'REFRESH',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w700,
+                                        color: Color(0xFF1E3A9F),
+                                        letterSpacing: 0.8,
+                                      ),
+                                    ),
+                                    SizedBox(width: 4),
+                                    Icon(
+                                      Icons.refresh,
+                                      color: Color(0xFF1E3A9F),
+                                      size: 16,
+                                    ),
+                                  ],
                                 ),
                               ),
                             ],
                           ),
-                          const Spacer(),
-                          GestureDetector(
-                            onTap: () {},
-                            child: const Row(
-                              children: [
-                                Text(
-                                  'REFRESH',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w700,
-                                    color: Color(0xFF1E3A9F),
-                                    letterSpacing: 0.8,
-                                  ),
-                                ),
-                                SizedBox(width: 4),
-                                Icon(
-                                  Icons.refresh,
-                                  color: Color(0xFF1E3A9F),
-                                  size: 16,
-                                ),
-                              ],
-                            ),
-                          ),
+                          const SizedBox(height: 16),
+
+                          if (beacons.isEmpty)
+                            _buildEmptyCard(state)
+                          else
+                            ...beacons.map(_buildBeaconCard),
                         ],
                       ),
-                      const SizedBox(height: 16),
+                    ),
+                  ],
+                ),
+              ),
 
-                      // Beacon Cards
-                      ..._beacons.map((beacon) => _buildBeaconCard(beacon)),
-                    ],
+              // FAB
+              Positioned(
+                bottom: 20,
+                right: 20,
+                child: GestureDetector(
+                  onTap: () {
+                    context.read<BeaconScannerBloc>().add(
+                      const BeaconScannerStartRequested(),
+                    );
+                  },
+                  child: Container(
+                    width: 52,
+                    height: 52,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF1E3A9F),
+                      borderRadius: BorderRadius.circular(14),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(
+                            0xFF1E3A9F,
+                          ).withValues(alpha: 0.35),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: const Icon(
+                      Icons.play_arrow,
+                      color: Colors.white,
+                      size: 26,
+                    ),
                   ),
                 ),
-              ],
-            ),
-          ),
-
-          // FAB
-          Positioned(
-            bottom: 20,
-            right: 20,
-            child: Container(
-              width: 52,
-              height: 52,
-              decoration: BoxDecoration(
-                color: const Color(0xFF1E3A9F),
-                borderRadius: BorderRadius.circular(14),
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color(0xFF1E3A9F).withValues(alpha: 0.35),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
               ),
-              child: const Icon(Icons.add, color: Colors.white, size: 26),
-            ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
   Widget _buildRadarIcon() {
     return AnimatedBuilder(
       animation: _pulseAnimation,
-      builder: (context, child) {
+      builder: (BuildContext context, Widget? child) {
         return Stack(
           alignment: Alignment.center,
           children: [
@@ -261,7 +280,7 @@ class _DashboardScreenState extends State<DashboardScreen>
     );
   }
 
-  Widget _buildActiveNodesCard() {
+  Widget _buildActiveNodesCard(int activeNodes) {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
       decoration: BoxDecoration(
@@ -271,8 +290,8 @@ class _DashboardScreenState extends State<DashboardScreen>
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: const [
-          Text(
+        children: [
+          const Text(
             'ACTIVE NODES',
             style: TextStyle(
               fontSize: 10,
@@ -281,10 +300,10 @@ class _DashboardScreenState extends State<DashboardScreen>
               letterSpacing: 1.1,
             ),
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           Text(
-            '12',
-            style: TextStyle(
+            '$activeNodes',
+            style: const TextStyle(
               fontSize: 36,
               fontWeight: FontWeight.bold,
               color: Color(0xFF1E3A9F),
@@ -295,7 +314,7 @@ class _DashboardScreenState extends State<DashboardScreen>
     );
   }
 
-  Widget _buildRSSICard() {
+  Widget _buildRSSICard(int? strongestRssi) {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
       decoration: BoxDecoration(
@@ -317,17 +336,17 @@ class _DashboardScreenState extends State<DashboardScreen>
           const SizedBox(height: 8),
           Row(
             crossAxisAlignment: CrossAxisAlignment.end,
-            children: const [
+            children: [
               Text(
-                '-42',
-                style: TextStyle(
+                strongestRssi?.toString() ?? '--',
+                style: const TextStyle(
                   fontSize: 36,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
                 ),
               ),
-              SizedBox(width: 4),
-              Padding(
+              const SizedBox(width: 4),
+              const Padding(
                 padding: EdgeInsets.only(bottom: 6),
                 child: Text(
                   'dBm',
@@ -345,8 +364,33 @@ class _DashboardScreenState extends State<DashboardScreen>
     );
   }
 
-  Widget _buildBeaconCard(Map<String, dynamic> beacon) {
-    final bool isCritical = beacon['critical'] as bool;
+  Widget _buildEmptyCard(BeaconScannerState state) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFEEEEEE)),
+      ),
+      child: Text(
+        state.message ??
+            'No beacons detected yet. Keep the app open or run on a physical device.',
+        style: const TextStyle(
+          fontSize: 13,
+          color: Color(0xFF666666),
+          height: 1.5,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBeaconCard(BeaconDevice beacon) {
+    final bool isCritical =
+        beacon.distanceMeters > 0 && beacon.distanceMeters <= 5;
+    final String distanceText = beacon.distanceMeters > 0
+        ? beacon.distanceMeters.toStringAsFixed(1)
+        : '--';
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -371,7 +415,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        beacon['name'],
+                        beacon.name ?? 'Beacon ${beacon.major}-${beacon.minor}',
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -380,7 +424,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'UUID: ${beacon['uuid']}',
+                        'UUID: ${_shortUuid(beacon.uuid)}',
                         style: const TextStyle(
                           fontSize: 11,
                           color: Color(0xFF888888),
@@ -407,7 +451,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         Text(
-                          beacon['distance'],
+                          distanceText,
                           style: TextStyle(
                             fontSize: 28,
                             fontWeight: FontWeight.bold,
@@ -450,7 +494,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      beacon['majorId'],
+                      '${beacon.major}',
                       style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
@@ -475,7 +519,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      beacon['minorId'],
+                      '${beacon.minor}',
                       style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
@@ -485,7 +529,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                   ],
                 ),
                 const Spacer(),
-                // Critical badge or device icon
+                // Critical badge or signal icon
                 if (isCritical)
                   Container(
                     padding: const EdgeInsets.symmetric(
@@ -509,12 +553,81 @@ class _DashboardScreenState extends State<DashboardScreen>
                     ),
                   )
                 else
-                  Icon(beacon['icon'], color: beacon['iconColor'], size: 22),
+                  const Icon(
+                    Icons.bluetooth,
+                    color: Color(0xFF888888),
+                    size: 22,
+                  ),
               ],
             ),
           ],
         ),
       ),
     );
+  }
+
+  String _statusLabel(BeaconScannerState state) {
+    switch (state.status) {
+      case BeaconScreenStatus.scanning:
+        return 'STATUS: ACTIVE';
+      case BeaconScreenStatus.permissionDenied:
+        return 'STATUS: PERMISSION REQUIRED';
+      case BeaconScreenStatus.bluetoothOff:
+        return 'STATUS: BLUETOOTH OFF';
+      case BeaconScreenStatus.locationOff:
+        return 'STATUS: LOCATION OFF';
+      case BeaconScreenStatus.error:
+        return 'STATUS: ERROR';
+      case BeaconScreenStatus.initial:
+      case BeaconScreenStatus.loading:
+      case BeaconScreenStatus.stopped:
+        return 'STATUS: IDLE';
+    }
+  }
+
+  Color _statusColor(BeaconScannerState state) {
+    switch (state.status) {
+      case BeaconScreenStatus.scanning:
+        return const Color(0xFF1E3A9F);
+      case BeaconScreenStatus.error:
+      case BeaconScreenStatus.bluetoothOff:
+      case BeaconScreenStatus.locationOff:
+      case BeaconScreenStatus.permissionDenied:
+        return const Color(0xFFCC2222);
+      case BeaconScreenStatus.initial:
+      case BeaconScreenStatus.loading:
+      case BeaconScreenStatus.stopped:
+        return const Color(0xFF888888);
+    }
+  }
+
+  String _subtitle(BeaconScannerState state) {
+    if (state.message != null && state.message!.isNotEmpty) {
+      return state.message!;
+    }
+
+    switch (state.status) {
+      case BeaconScreenStatus.scanning:
+        return 'Actively monitoring Bluetooth Low Energy\nsignals in your immediate perimeter.';
+      case BeaconScreenStatus.permissionDenied:
+        return 'Grant Bluetooth and Always Location\npermissions to continue scanning.';
+      case BeaconScreenStatus.bluetoothOff:
+        return 'Turn on Bluetooth to resume\nreal-time beacon detection.';
+      case BeaconScreenStatus.locationOff:
+        return 'Enable location services for\nproximity-aware background behavior.';
+      case BeaconScreenStatus.error:
+        return 'Scanner encountered an issue.\nTap refresh to retry.';
+      case BeaconScreenStatus.initial:
+      case BeaconScreenStatus.loading:
+      case BeaconScreenStatus.stopped:
+        return 'Scanner is ready and waiting.\nTap refresh to start ranging beacons.';
+    }
+  }
+
+  String _shortUuid(String uuid) {
+    if (uuid.length <= 18) {
+      return uuid;
+    }
+    return '${uuid.substring(0, 18)}...';
   }
 }

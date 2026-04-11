@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "475693822001",
+    "project_id": "ibeamscanner",
+    "storage_bucket": "ibeamscanner.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:475693822001:android:9ccc616a8bf7dc88d6e510",
+        "android_client_info": {
+          "package_name": "com.example.ibeam_scanner"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "475693822001-egfq2h2iujqq8sisol8330thpmc3cmoi.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.ibeam_scanner",
+            "certificate_hash": "cf31296f53ed898eed94c74dd6bafa655bed801b"
+          }
+        },
+        {
+          "client_id": "475693822001-j5gm8gu92iq3vguttq93ihllg1rvt4m8.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCrlBXH61wtUdCEXEd8hHtly909HiY5mlM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "475693822001-j5gm8gu92iq3vguttq93ihllg1rvt4m8.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "475693822001-k1ikk6v73mfki6b3s9b6760v3picpg1c.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.ibeamScanner"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

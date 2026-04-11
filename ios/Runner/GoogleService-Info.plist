@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>475693822001-k1ikk6v73mfki6b3s9b6760v3picpg1c.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.475693822001-k1ikk6v73mfki6b3s9b6760v3picpg1c</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>475693822001-egfq2h2iujqq8sisol8330thpmc3cmoi.apps.googleusercontent.com</string>
+	<key>API_KEY</key>
+	<string>AIzaSyAd2BGcq2uuRyahs0K6syjn2c8wh0IaO_c</string>
+	<key>GCM_SENDER_ID</key>
+	<string>475693822001</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.example.ibeamScanner</string>
+	<key>PROJECT_ID</key>
+	<string>ibeamscanner</string>
+	<key>STORAGE_BUCKET</key>
+	<string>ibeamscanner.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:475693822001:ios:8a626a58013ec13ad6e510</string>
+</dict>
+</plist>

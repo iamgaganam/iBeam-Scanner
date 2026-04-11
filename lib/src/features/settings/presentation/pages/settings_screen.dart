@@ -1,13 +1,24 @@
 import 'package:flutter/material.dart';
-import '../../../../app/routes/app_routes.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
 import '../../../../core/presentation/widgets/custom_button.dart';
 import '../../../../core/presentation/widgets/stat_card.dart';
+import '../../../auth/presentation/bloc/auth_bloc.dart';
+import '../../../auth/presentation/bloc/auth_event.dart';
+import '../../../beacon_scanner/presentation/bloc/beacon_scanner_bloc.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final authState = context.watch<AuthBloc>().state;
+    final beaconState = context.watch<BeaconScannerBloc>().state;
+
+    final String displayName = authState.user?.displayName ?? 'Operator';
+    final String email = authState.user?.email ?? 'No email linked';
+    final String signalHealth = _signalHealth(beaconState.strongestRssi);
+
     return Scaffold(
       backgroundColor: const Color(0xFFF2F1EF),
       body: SingleChildScrollView(
@@ -24,8 +35,8 @@ class SettingsScreen extends StatelessWidget {
                   _buildAvatar(),
                   const SizedBox(height: 16),
                   // Name
-                  const Text(
-                    'Marcus Sterling',
+                  Text(
+                    displayName,
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
@@ -34,27 +45,30 @@ class SettingsScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   // Email
-                  const Text(
-                    'm.sterling@proximity-aware.io',
-                    style: TextStyle(fontSize: 14, color: Color(0xFF888888)),
+                  Text(
+                    email,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Color(0xFF888888),
+                    ),
                   ),
                   const SizedBox(height: 24),
                   // Stats Row
                   Row(
                     children: [
-                      const Expanded(
+                      Expanded(
                         child: StatCard(
                           label: 'ACTIVE NODES',
-                          value: '12',
-                          valueColor: Color(0xFF1E3A9F),
+                          value: '${beaconState.activeNodes}',
+                          valueColor: const Color(0xFF1E3A9F),
                         ),
                       ),
                       const SizedBox(width: 14),
-                      const Expanded(
+                      Expanded(
                         child: StatCard(
                           label: 'SIGNAL HEALTH',
-                          value: '98%',
-                          valueColor: Color(0xFF8B6F00),
+                          value: signalHealth,
+                          valueColor: const Color(0xFF8B6F00),
                         ),
                       ),
                     ],
@@ -128,10 +142,8 @@ class SettingsScreen extends StatelessWidget {
                     backgroundColor: const Color(0xFFFFEDED),
                     foregroundColor: const Color(0xFFCC2222),
                     onPressed: () {
-                      Navigator.pushNamedAndRemoveUntil(
-                        context,
-                        AppRoutes.login,
-                        (route) => false,
+                      context.read<AuthBloc>().add(
+                        const AuthSignOutRequested(),
                       );
                     },
                   ),
@@ -159,6 +171,17 @@ class SettingsScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _signalHealth(int? strongestRssi) {
+    if (strongestRssi == null) {
+      return '0%';
+    }
+
+    final int clamped = strongestRssi.clamp(-100, -30);
+    final double ratio = (clamped + 100) / 70;
+    final int percent = (ratio * 100).round();
+    return '$percent%';
   }
 
   Widget _buildAvatar() {

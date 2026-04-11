@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
-import '../../../../app/routes/app_routes.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
 import '../../../../core/presentation/widgets/custom_button.dart';
+import '../bloc/auth_bloc.dart';
+import '../bloc/auth_event.dart';
+import '../bloc/auth_state.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -20,82 +24,114 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF2F1EF),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                const SizedBox(height: 72),
+    return BlocListener<AuthBloc, AuthState>(
+      listenWhen: (AuthState previous, AuthState current) =>
+          previous.status != current.status,
+      listener: (BuildContext context, AuthState state) {
+        if (state.status == AuthStatus.failure && state.errorMessage != null) {
+          ScaffoldMessenger.of(context)
+            ..hideCurrentSnackBar()
+            ..showSnackBar(SnackBar(content: Text(state.errorMessage!)));
+        }
+      },
+      child: Builder(
+        builder: (BuildContext context) {
+          final AuthState authState = context.watch<AuthBloc>().state;
+          final bool isLoading = authState.isLoading;
 
-                // App Icon
-                _buildAppIcon(),
+          return Stack(
+            children: [
+              AbsorbPointer(
+                absorbing: isLoading,
+                child: Scaffold(
+                  backgroundColor: const Color(0xFFF2F1EF),
+                  body: SafeArea(
+                    child: SingleChildScrollView(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            const SizedBox(height: 72),
 
-                const SizedBox(height: 40),
+                            // App Icon
+                            _buildAppIcon(),
 
-                // Title
-                const Text(
-                  'Welcome to Proximity\nAware',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 30,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF111111),
-                    height: 1.25,
+                            const SizedBox(height: 40),
+
+                            // Title
+                            const Text(
+                              'Welcome to Proximity\nAware',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 30,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF111111),
+                                height: 1.25,
+                              ),
+                            ),
+
+                            const SizedBox(height: 14),
+
+                            // Subtitle
+                            const Text(
+                              'Stay connected with precision location\ntracking and real-time proximity alerts.',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 15,
+                                color: Color(0xFF888888),
+                                height: 1.55,
+                              ),
+                            ),
+
+                            const SizedBox(height: 48),
+
+                            // Sign in with Apple
+                            _buildAppleButton(isLoading),
+
+                            const SizedBox(height: 14),
+
+                            // Sign in with Google
+                            _buildGoogleButton(isLoading),
+
+                            const SizedBox(height: 32),
+
+                            // OR ACCESS VIA divider
+                            _buildDivider(),
+
+                            const SizedBox(height: 24),
+
+                            // Email input
+                            _buildEmailField(),
+
+                            const SizedBox(height: 20),
+
+                            // Secure Firebase SSO badge
+                            _buildFirebaseBadge(),
+
+                            const SizedBox(height: 48),
+
+                            // Terms & Privacy
+                            _buildTermsText(),
+
+                            const SizedBox(height: 32),
+                          ],
+                        ),
+                      ),
+                    ),
                   ),
                 ),
-
-                const SizedBox(height: 14),
-
-                // Subtitle
-                const Text(
-                  'Stay connected with precision location\ntracking and real-time proximity alerts.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 15,
-                    color: Color(0xFF888888),
-                    height: 1.55,
+              ),
+              if (isLoading)
+                const Positioned.fill(
+                  child: ColoredBox(
+                    color: Color(0xAAFFFFFF),
+                    child: Center(child: CircularProgressIndicator()),
                   ),
                 ),
-
-                const SizedBox(height: 48),
-
-                // Sign in with Apple
-                _buildAppleButton(),
-
-                const SizedBox(height: 14),
-
-                // Sign in with Google
-                _buildGoogleButton(),
-
-                const SizedBox(height: 32),
-
-                // OR ACCESS VIA divider
-                _buildDivider(),
-
-                const SizedBox(height: 24),
-
-                // Email input
-                _buildEmailField(),
-
-                const SizedBox(height: 20),
-
-                // Secure Firebase SSO badge
-                _buildFirebaseBadge(),
-
-                const SizedBox(height: 48),
-
-                // Terms & Privacy
-                _buildTermsText(),
-
-                const SizedBox(height: 32),
-              ],
-            ),
-          ),
-        ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -134,19 +170,22 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Widget _buildAppleButton() {
+  Widget _buildAppleButton(bool isLoading) {
     return CustomButton(
       label: 'Sign in with Apple',
       icon: Icons.apple,
       backgroundColor: const Color(0xFF111111),
       foregroundColor: Colors.white,
       onPressed: () {
-        Navigator.pushNamed(context, AppRoutes.setupPermission);
+        if (isLoading) {
+          return;
+        }
+        context.read<AuthBloc>().add(const AuthAppleSignInRequested());
       },
     );
   }
 
-  Widget _buildGoogleButton() {
+  Widget _buildGoogleButton(bool isLoading) {
     return CustomButton(
       label: 'Sign in with Google',
       customIcon: _buildGoogleLogo(),
@@ -154,7 +193,10 @@ class _LoginScreenState extends State<LoginScreen> {
       foregroundColor: const Color(0xFF111111),
       outlined: true,
       onPressed: () {
-        Navigator.pushNamed(context, AppRoutes.setupPermission);
+        if (isLoading) {
+          return;
+        }
+        context.read<AuthBloc>().add(const AuthGoogleSignInRequested());
       },
     );
   }

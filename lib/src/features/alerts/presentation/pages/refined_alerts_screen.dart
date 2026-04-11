@@ -1,153 +1,136 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-class RefinedAlertsScreen extends StatelessWidget {
+import '../../domain/entities/proximity_alert.dart';
+import '../bloc/alerts_bloc.dart';
+import '../bloc/alerts_event.dart';
+import '../bloc/alerts_state.dart';
+
+class RefinedAlertsScreen extends StatefulWidget {
   const RefinedAlertsScreen({super.key});
+
+  @override
+  State<RefinedAlertsScreen> createState() => _RefinedAlertsScreenState();
+}
+
+class _RefinedAlertsScreenState extends State<RefinedAlertsScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<AlertsBloc>().add(const AlertsRequested());
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF2F1EF),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 20),
-        child: Column(
-          children: [
-            // Stats Row
-            _buildStatsRow(),
-            const SizedBox(height: 20),
+      body: BlocBuilder<AlertsBloc, AlertsState>(
+        builder: (BuildContext context, AlertsState state) {
+          if (state is AlertLoading || state is AlertInitial) {
+            return const Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CircularProgressIndicator(),
+                  SizedBox(height: 12),
+                  Text(
+                    'Loading proximity alerts...',
+                    style: TextStyle(fontSize: 14, color: Color(0xFF666666)),
+                  ),
+                ],
+              ),
+            );
+          }
 
-            // Alert Cards
-            _buildAlertCard(
-              tag: 'BACKGROUND_DETECTION',
-              title: 'New Beacon Found',
-              description:
-                  "You are near 'Conference Room B'. Open the app for details and automated room check-in.",
-              tagIcon: Icons.my_location,
-              tagIconBg: const Color(0xFFEEF0F8),
-              tagIconColor: const Color(0xFF1E3A9F),
-              leftBorderColor: const Color(0xFF1E3A9F),
-              metricLabel: 'CURRENT DISTANCE',
-              metricValue: '8.5m',
-              metricValueColor: const Color(0xFF1E3A9F),
-              threshold: 'Threshold: 10.0m',
-              uuid: 'E2C56DB5-DFFB-48D2-B868-D0F5A71996E8',
-              buttonLabel: 'Open App',
-              buttonColor: const Color(0xFF1E3A9F),
-              buttonTextColor: Colors.white,
+          if (state is AlertError) {
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.error_outline,
+                      size: 40,
+                      color: Color(0xFFCC2222),
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      state.message,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Color(0xFF555555),
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                    ElevatedButton(
+                      onPressed: () {
+                        context.read<AlertsBloc>().add(const AlertsRequested());
+                      },
+                      child: const Text('Retry'),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
+
+          final List<ProximityAlert> alerts = (state as AlertLoaded).alerts;
+
+          return SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 20),
+            child: Column(
+              children: [
+                _buildStatsRow(alerts),
+                const SizedBox(height: 20),
+                ...alerts.map((ProximityAlert alert) {
+                  final _AlertVisual visual = _resolveVisual(alert);
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 14),
+                    child: _buildAlertCard(
+                      tag: alert.type,
+                      title: alert.title,
+                      description: alert.body,
+                      tagIcon: visual.icon,
+                      tagIconBg: visual.iconBackground,
+                      tagIconColor: visual.iconColor,
+                      leftBorderColor: visual.borderColor,
+                      metricLabel: _metricLabel(alert.type),
+                      metricValue: _metricValue(alert),
+                      metricValueColor: visual.metricColor,
+                      threshold: _thresholdText(alert),
+                      uuid: alert.uuid,
+                      buttonLabel: _buttonLabel(alert.action),
+                      buttonColor: visual.buttonColor,
+                      buttonTextColor: visual.buttonTextColor,
+                    ),
+                  );
+                }),
+                const SizedBox(height: 6),
+              ],
             ),
-            const SizedBox(height: 14),
-
-            _buildAlertCard(
-              tag: 'PROXIMITY_THRESHOLD',
-              title: 'Proximity Alert',
-              description:
-                  'Welcome! You are now within 5 meters of the beacon. High precision location tracking is active.',
-              tagIcon: Icons.warning_amber_rounded,
-              tagIconBg: const Color(0xFFFFF8E1),
-              tagIconColor: const Color(0xFFFFAA00),
-              leftBorderColor: const Color(0xFFFFAA00),
-              metricLabel: 'CURRENT DISTANCE',
-              metricValue: '4.8m',
-              metricValueColor: const Color(0xFFFFAA00),
-              threshold: 'Threshold: 5.0m',
-              uuid: 'D4B56DB5-AFFB-48D2-A060-B0F5A71996E1',
-              buttonLabel: 'View Details',
-              buttonColor: const Color(0xFFFFAA00),
-              buttonTextColor: Colors.white,
-            ),
-            const SizedBox(height: 14),
-
-            _buildAlertCard(
-              tag: 'IMMEDIATE_PROXIMITY',
-              title: 'Touchpoint Reached',
-              description:
-                  "You are standing directly at 'Private Office 4'. Tap to check-in for your scheduled meeting.",
-              tagIcon: Icons.check_circle,
-              tagIconBg: const Color(0xFFE8F8F0),
-              tagIconColor: const Color(0xFF2AAA6A),
-              leftBorderColor: const Color(0xFF2AAA6A),
-              metricLabel: 'CURRENT DISTANCE',
-              metricValue: '0.2m',
-              metricValueColor: const Color(0xFF2AAA6A),
-              threshold: 'Threshold: 1.0m',
-              uuid: 'A3221188-3344-48C2-A001-EE203344CC89',
-              buttonLabel: 'Auto Check-in',
-              buttonColor: const Color(0xFF2AAA6A),
-              buttonTextColor: Colors.white,
-            ),
-            const SizedBox(height: 14),
-
-            _buildAlertCard(
-              tag: 'SIGNAL_LOST',
-              title: 'Connection Dropped',
-              description:
-                  "Signal for 'West Wing Lobby' has been lost due to interference. System has been marked as inactive.",
-              tagIcon: Icons.signal_wifi_off,
-              tagIconBg: const Color(0xFFFFEEEE),
-              tagIconColor: const Color(0xFFCC2222),
-              leftBorderColor: const Color(0xFFCC2222),
-              metricLabel: 'LAST SEEN',
-              metricValue: '—',
-              metricValueColor: const Color(0xFF111111),
-              threshold: 'Threshold: 15.0m',
-              uuid: 'C3C56DB5-EEDF-48D2-A060-D0F5A71996F5',
-              buttonLabel: 'Retry Connection',
-              buttonColor: const Color(0xFFCC2222),
-              buttonTextColor: Colors.white,
-            ),
-            const SizedBox(height: 14),
-
-            _buildAlertCard(
-              tag: 'HARDWARE_ERROR',
-              title: 'Bluetooth Disabled',
-              description:
-                  'Scanning has stopped because Bluetooth was turned off mid-scan. Please enable it to resume.',
-              tagIcon: Icons.bluetooth_disabled,
-              tagIconBg: const Color(0xFFFFEEEE),
-              tagIconColor: const Color(0xFFCC2222),
-              leftBorderColor: const Color(0xFFCC2222),
-              metricLabel: 'STATUS',
-              metricValue: 'OFF',
-              metricValueColor: const Color(0xFFCC2222),
-              threshold: 'Hardware ID: BT_01',
-              uuid: 'SYSTEM_PAYLOAD: ERROR_BT_404',
-              buttonLabel: 'Open Settings',
-              buttonColor: const Color(0xFFF0EFEB),
-              buttonTextColor: const Color(0xFF444444),
-            ),
-            const SizedBox(height: 14),
-
-            _buildAlertCard(
-              tag: 'PERMISSION_DENIED',
-              title: 'Location Access',
-              description:
-                  "Background scanning requires 'Always Allow' location permissions for beacon detection to function.",
-              tagIcon: Icons.location_off,
-              tagIconBg: const Color(0xFFFFF8E1),
-              tagIconColor: const Color(0xFFFFAA00),
-              leftBorderColor: const Color(0xFFFFAA00),
-              metricLabel: 'PERMISSION',
-              metricValue: 'DENIED',
-              metricValueColor: const Color(0xFFFFAA00),
-              threshold: 'Requirement: Always',
-              uuid: 'PERM_ID: IOS_LOCATION_ALWAYS_ALLOW',
-              buttonLabel: 'Grant Access',
-              buttonColor: const Color(0xFFFFAA00),
-              buttonTextColor: Colors.white,
-            ),
-
-            const SizedBox(height: 20),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
 
-  Widget _buildStatsRow() {
+  Widget _buildStatsRow(List<ProximityAlert> alerts) {
+    final int activeScans = alerts.length;
+    final int nearbyBeacons = alerts
+        .where(
+          (ProximityAlert alert) =>
+              alert.currentDistance > 0 && alert.currentDistance <= 10,
+        )
+        .length;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 4),
       child: Row(
         children: [
-          // Active Scans
           Expanded(
             child: Container(
               padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
@@ -160,8 +143,8 @@ class RefinedAlertsScreen extends StatelessWidget {
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
-                  Text(
+                children: [
+                  const Text(
                     'ACTIVE SCANS',
                     style: TextStyle(
                       fontSize: 9,
@@ -170,10 +153,10 @@ class RefinedAlertsScreen extends StatelessWidget {
                       letterSpacing: 1.1,
                     ),
                   ),
-                  SizedBox(height: 6),
+                  const SizedBox(height: 6),
                   Text(
-                    '12',
-                    style: TextStyle(
+                    '$activeScans',
+                    style: const TextStyle(
                       fontSize: 32,
                       fontWeight: FontWeight.bold,
                       color: Color(0xFF111111),
@@ -184,7 +167,6 @@ class RefinedAlertsScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 12),
-          // Nearby Beacons
           Expanded(
             child: Container(
               padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
@@ -197,8 +179,8 @@ class RefinedAlertsScreen extends StatelessWidget {
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
-                  Text(
+                children: [
+                  const Text(
                     'NEARBY BEACONS',
                     style: TextStyle(
                       fontSize: 9,
@@ -207,10 +189,10 @@ class RefinedAlertsScreen extends StatelessWidget {
                       letterSpacing: 1.1,
                     ),
                   ),
-                  SizedBox(height: 6),
+                  const SizedBox(height: 6),
                   Text(
-                    '04',
-                    style: TextStyle(
+                    '$nearbyBeacons',
+                    style: const TextStyle(
                       fontSize: 32,
                       fontWeight: FontWeight.bold,
                       color: Color(0xFF111111),
@@ -253,7 +235,6 @@ class RefinedAlertsScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Tag row
             Row(
               children: [
                 Container(
@@ -292,8 +273,6 @@ class RefinedAlertsScreen extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 12),
-
-            // Description
             Text(
               description,
               style: const TextStyle(
@@ -303,8 +282,6 @@ class RefinedAlertsScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 14),
-
-            // Metric row
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               decoration: BoxDecoration(
@@ -349,8 +326,6 @@ class RefinedAlertsScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 8),
-
-            // UUID row
             Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -370,8 +345,6 @@ class RefinedAlertsScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 14),
-
-            // Action button
             SizedBox(
               width: double.infinity,
               height: 46,
@@ -400,4 +373,122 @@ class RefinedAlertsScreen extends StatelessWidget {
       ),
     );
   }
+
+  String _metricLabel(String type) {
+    switch (type) {
+      case 'SIGNAL_LOST':
+        return 'LAST SEEN';
+      case 'HARDWARE_ERROR':
+        return 'STATUS';
+      case 'PERMISSION_DENIED':
+        return 'PERMISSION';
+      default:
+        return 'CURRENT DISTANCE';
+    }
+  }
+
+  String _metricValue(ProximityAlert alert) {
+    switch (alert.type) {
+      case 'SIGNAL_LOST':
+        return '--';
+      case 'HARDWARE_ERROR':
+        return 'OFF';
+      case 'PERMISSION_DENIED':
+        return 'DENIED';
+      default:
+        return '${alert.currentDistance.toStringAsFixed(1)}m';
+    }
+  }
+
+  String _thresholdText(ProximityAlert alert) {
+    if (alert.thresholdMeters <= 0) {
+      return 'Action: ${alert.action}';
+    }
+    return 'Threshold: ${alert.thresholdMeters.toStringAsFixed(1)}m';
+  }
+
+  String _buttonLabel(String action) {
+    switch (action) {
+      case 'navigate_to_details':
+        return 'Open App';
+      case 'show_welcome_message':
+        return 'View Details';
+      case 'auto_checkin':
+        return 'Auto Check-in';
+      case 'mark_as_inactive':
+        return 'Retry Connection';
+      case 'open_settings':
+        return 'Open Settings';
+      case 'request_permission':
+        return 'Grant Access';
+      default:
+        return 'Open';
+    }
+  }
+
+  _AlertVisual _resolveVisual(ProximityAlert alert) {
+    switch (alert.style) {
+      case 'amber_warning':
+        return const _AlertVisual(
+          icon: Icons.warning_amber_rounded,
+          iconBackground: Color(0xFFFFF8E1),
+          iconColor: Color(0xFFFFAA00),
+          borderColor: Color(0xFFFFAA00),
+          metricColor: Color(0xFFFFAA00),
+          buttonColor: Color(0xFFFFAA00),
+          buttonTextColor: Colors.white,
+        );
+      case 'success_green':
+        return const _AlertVisual(
+          icon: Icons.check_circle,
+          iconBackground: Color(0xFFE8F8F0),
+          iconColor: Color(0xFF2AAA6A),
+          borderColor: Color(0xFF2AAA6A),
+          metricColor: Color(0xFF2AAA6A),
+          buttonColor: Color(0xFF2AAA6A),
+          buttonTextColor: Colors.white,
+        );
+      case 'error_red':
+        return const _AlertVisual(
+          icon: Icons.error_outline,
+          iconBackground: Color(0xFFFFEEEE),
+          iconColor: Color(0xFFCC2222),
+          borderColor: Color(0xFFCC2222),
+          metricColor: Color(0xFFCC2222),
+          buttonColor: Color(0xFFF0EFEB),
+          buttonTextColor: Color(0xFF444444),
+        );
+      case 'info_blue':
+      default:
+        return const _AlertVisual(
+          icon: Icons.my_location,
+          iconBackground: Color(0xFFEEF0F8),
+          iconColor: Color(0xFF1E3A9F),
+          borderColor: Color(0xFF1E3A9F),
+          metricColor: Color(0xFF1E3A9F),
+          buttonColor: Color(0xFF1E3A9F),
+          buttonTextColor: Colors.white,
+        );
+    }
+  }
+}
+
+class _AlertVisual {
+  const _AlertVisual({
+    required this.icon,
+    required this.iconBackground,
+    required this.iconColor,
+    required this.borderColor,
+    required this.metricColor,
+    required this.buttonColor,
+    required this.buttonTextColor,
+  });
+
+  final IconData icon;
+  final Color iconBackground;
+  final Color iconColor;
+  final Color borderColor;
+  final Color metricColor;
+  final Color buttonColor;
+  final Color buttonTextColor;
 }
