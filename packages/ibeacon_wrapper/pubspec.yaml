@@ -1,0 +1,13 @@
+name: ibeacon_wrapper
+description: Abstraction layer for iBeacon scanning and proximity estimation.
+version: 0.0.1
+publish_to: none
+
+environment:
+  sdk: ^3.11.4
+
+dependencies:
+  meta: ^1.12.0
+
+dev_dependencies:
+  lints: ^6.0.0
