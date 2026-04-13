@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:crypto/crypto.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
@@ -18,24 +19,39 @@ class FirebaseAuthDataSource {
   final FirebaseAuth _firebaseAuth;
   final GoogleSignIn _googleSignIn;
 
+  static const List<String> _googleScopes = <String>['email'];
+
   Stream<User?> authStateChanges() => _firebaseAuth.authStateChanges();
 
   Future<void> signInWithGoogle() async {
     try {
-      final GoogleSignInAccount? account = await _googleSignIn.signIn();
-      if (account == null) {
-        throw const AppException('Google sign-in cancelled by user.');
+      if (kIsWeb) {
+        await _firebaseAuth.signInWithPopup(GoogleAuthProvider());
+        return;
       }
 
-      final GoogleSignInAuthentication authentication =
-          await account.authentication;
+      final GoogleSignInAccount account = await _googleSignIn.authenticate(
+        scopeHint: _googleScopes,
+      );
+
+      final GoogleSignInAuthentication authentication = account.authentication;
+      final GoogleSignInClientAuthorization authorization =
+          await account.authorizationClient.authorizationForScopes(
+            _googleScopes,
+          ) ??
+          await account.authorizationClient.authorizeScopes(_googleScopes);
 
       final OAuthCredential credential = GoogleAuthProvider.credential(
-        accessToken: authentication.accessToken,
         idToken: authentication.idToken,
+        accessToken: authorization.accessToken,
       );
 
       await _firebaseAuth.signInWithCredential(credential);
+    } on GoogleSignInException catch (error) {
+      if (error.code == GoogleSignInExceptionCode.canceled) {
+        throw const AppException('Google sign-in cancelled by user.');
+      }
+      throw AppException(error.description ?? 'Google sign-in failed.');
     } on FirebaseAuthException catch (error) {
       throw AppException(error.message ?? 'Google sign-in failed.');
     } catch (error) {

@@ -16,8 +16,8 @@ import 'di/injector.dart';
 import 'routes/app_routes.dart';
 import 'widgets/auth_gate.dart';
 
-class IBeamScannerApp extends StatelessWidget {
-  const IBeamScannerApp({super.key});
+class ProxiMateApp extends StatelessWidget {
+  const ProxiMateApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +31,7 @@ class IBeamScannerApp extends StatelessWidget {
         BlocProvider<AlertsBloc>(create: (_) => sl<AlertsBloc>()),
       ],
       child: MaterialApp(
-        title: 'Proximity Aware',
+        title: 'ProxiMate',
         debugShowCheckedModeBanner: false,
         builder: (context, child) {
           return ScrollConfiguration(

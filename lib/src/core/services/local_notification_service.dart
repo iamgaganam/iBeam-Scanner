@@ -12,12 +12,12 @@ class LocalNotificationService {
     }
 
     const InitializationSettings settings = InitializationSettings(
-      android: AndroidInitializationSettings('@mipmap/ic_launcher'),
+      android: AndroidInitializationSettings('@mipmap/launcher_icon'),
       iOS: DarwinInitializationSettings(),
       macOS: DarwinInitializationSettings(),
     );
 
-    await _plugin.initialize(settings);
+    await _plugin.initialize(settings: settings);
 
     const AndroidNotificationChannel channel = AndroidNotificationChannel(
       'proximity_alerts_channel',
@@ -69,6 +69,12 @@ class LocalNotificationService {
       macOS: DarwinNotificationDetails(),
     );
 
-    await _plugin.show(id, title, body, details, payload: payload);
+    await _plugin.show(
+      id: id,
+      title: title,
+      body: body,
+      notificationDetails: details,
+      payload: payload,
+    );
   }
 }

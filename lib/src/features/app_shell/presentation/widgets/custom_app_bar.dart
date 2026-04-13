@@ -15,7 +15,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    String titleText = 'Proximity Aware';
+    String titleText = 'ProxiMate';
     bool isAlerts = currentIndex == 1;
 
     return AppBar(

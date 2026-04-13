@@ -1,4 +1,4 @@
-# iBeam-Scanner
+# ProxiMate
 
 Proximity-aware Flutter application built with Clean Architecture, Bloc, Firebase SSO, and a dedicated iBeacon wrapper package.
 

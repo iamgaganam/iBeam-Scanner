@@ -62,10 +62,13 @@ Future<void> configureDependencies() async {
     return MockIBeaconScanner();
   });
 
+  final GoogleSignIn googleSignIn = GoogleSignIn.instance;
+  await googleSignIn.initialize();
+
   sl.registerLazySingleton<FirebaseAuthDataSource>(
     () => FirebaseAuthDataSource(
       firebaseAuth: FirebaseAuth.instance,
-      googleSignIn: GoogleSignIn(scopes: const <String>['email']),
+      googleSignIn: googleSignIn,
     ),
   );
   sl.registerLazySingleton<AuthRepository>(
