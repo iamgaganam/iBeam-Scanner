@@ -14,6 +14,8 @@ class FlutterBlueIBeaconScanner implements IBeaconScanner {
     this.scanRestartInterval = const Duration(seconds: 15),
   });
 
+  static const Duration _permissionRequestTimeout = Duration(seconds: 8);
+
   final Duration scanRestartInterval;
 
   final StreamController<List<BeaconSignal>> _beaconController =
@@ -60,7 +62,7 @@ class FlutterBlueIBeaconScanner implements IBeaconScanner {
       },
     );
 
-    final bool permissionGranted = await _ensurePermissions();
+    final bool permissionGranted = await _hasRequiredPermissions();
     if (!permissionGranted) {
       _statusController.add(ScannerStatus.permissionDenied);
       _initialized = true;
@@ -170,11 +172,16 @@ class FlutterBlueIBeaconScanner implements IBeaconScanner {
     }
 
     if (_isAndroidPlatform) {
-      final Map<Permission, PermissionStatus> firstRound = await <Permission>[
-        Permission.bluetoothScan,
-        Permission.bluetoothConnect,
-        Permission.locationWhenInUse,
-      ].request();
+      late final Map<Permission, PermissionStatus> firstRound;
+      try {
+        firstRound = await <Permission>[
+          Permission.bluetoothScan,
+          Permission.bluetoothConnect,
+          Permission.locationWhenInUse,
+        ].request();
+      } catch (_) {
+        return false;
+      }
 
       final bool firstRoundGranted =
           _isGranted(firstRound[Permission.bluetoothScan]) &&
@@ -184,15 +191,19 @@ class FlutterBlueIBeaconScanner implements IBeaconScanner {
         return false;
       }
 
-      final PermissionStatus always = await Permission.locationAlways.request();
-      return _isGranted(always);
+      return _requestBackgroundLocationPermission();
     }
 
     if (_isApplePlatform) {
-      final Map<Permission, PermissionStatus> firstRound = await <Permission>[
-        Permission.bluetooth,
-        Permission.locationWhenInUse,
-      ].request();
+      late final Map<Permission, PermissionStatus> firstRound;
+      try {
+        firstRound = await <Permission>[
+          Permission.bluetooth,
+          Permission.locationWhenInUse,
+        ].request();
+      } catch (_) {
+        return false;
+      }
 
       final bool firstRoundGranted =
           _isGranted(firstRound[Permission.bluetooth]) &&
@@ -201,8 +212,7 @@ class FlutterBlueIBeaconScanner implements IBeaconScanner {
         return false;
       }
 
-      final PermissionStatus always = await Permission.locationAlways.request();
-      return _isGranted(always);
+      return _requestBackgroundLocationPermission();
     }
 
     return true;
@@ -244,6 +254,22 @@ class FlutterBlueIBeaconScanner implements IBeaconScanner {
       return false;
     }
     return status.isGranted || status.isLimited;
+  }
+
+  Future<bool> _requestBackgroundLocationPermission() async {
+    try {
+      final PermissionStatus current = await Permission.locationAlways.status;
+      if (_isGranted(current)) {
+        return true;
+      }
+
+      final PermissionStatus requested = await Permission.locationAlways
+          .request()
+          .timeout(_permissionRequestTimeout, onTimeout: () => current);
+      return _isGranted(requested);
+    } catch (_) {
+      return false;
+    }
   }
 
   bool get _isAndroidPlatform =>

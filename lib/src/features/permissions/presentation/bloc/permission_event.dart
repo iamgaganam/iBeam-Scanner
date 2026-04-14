@@ -8,12 +8,16 @@ sealed class PermissionEvent extends Equatable {
 }
 
 class PermissionStatusRequested extends PermissionEvent {
-  const PermissionStatusRequested({this.silent = false});
+  const PermissionStatusRequested({
+    this.silent = false,
+    this.requireConfirmation = true,
+  });
 
   final bool silent;
+  final bool requireConfirmation;
 
   @override
-  List<Object?> get props => <Object?>[silent];
+  List<Object?> get props => <Object?>[silent, requireConfirmation];
 }
 
 class PermissionRequestSubmitted extends PermissionEvent {

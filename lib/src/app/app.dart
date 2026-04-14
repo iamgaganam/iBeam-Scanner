@@ -15,6 +15,7 @@ import '../features/settings/presentation/pages/settings_screen.dart';
 import 'di/injector.dart';
 import 'routes/app_routes.dart';
 import 'widgets/auth_gate.dart';
+import 'widgets/welcome_splash_screen.dart';
 
 class ProxiMateApp extends StatelessWidget {
   const ProxiMateApp({super.key});
@@ -54,7 +55,7 @@ class ProxiMateApp extends StatelessWidget {
             },
           ),
         ),
-        home: const AuthGate(),
+        home: const WelcomeSplashScreen(nextScreen: AuthGate()),
         routes: {
           AppRoutes.main: (context) => const MainLayout(),
           AppRoutes.dashboard: (context) => const DashboardScreen(),

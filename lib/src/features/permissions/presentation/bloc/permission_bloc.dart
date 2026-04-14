@@ -19,6 +19,7 @@ class PermissionBloc extends Bloc<PermissionEvent, PermissionState> {
 
   final GetPermissionStatus _getPermissionStatus;
   final RequestPermissions _requestPermissions;
+  bool _requestInFlight = false;
 
   Future<void> _onPermissionStatusRequested(
     PermissionStatusRequested event,
@@ -32,12 +33,17 @@ class PermissionBloc extends Bloc<PermissionEvent, PermissionState> {
 
     try {
       final PermissionSnapshot snapshot = await _getPermissionStatus();
+      final bool allowImmediateProceed =
+          snapshot.isReady && !event.requireConfirmation;
+      final PermissionFlowStatus status = allowImmediateProceed
+          ? PermissionFlowStatus.ready
+          : PermissionFlowStatus.actionRequired;
+
       emit(
         state.copyWith(
-          status: snapshot.isReady
-              ? PermissionFlowStatus.ready
-              : PermissionFlowStatus.actionRequired,
+          status: status,
           snapshot: snapshot,
+          userConfirmedGrant: allowImmediateProceed,
           clearError: true,
         ),
       );
@@ -46,6 +52,7 @@ class PermissionBloc extends Bloc<PermissionEvent, PermissionState> {
         state.copyWith(
           status: PermissionFlowStatus.error,
           errorMessage: error.toString(),
+          userConfirmedGrant: false,
         ),
       );
     }
@@ -55,18 +62,25 @@ class PermissionBloc extends Bloc<PermissionEvent, PermissionState> {
     PermissionRequestSubmitted event,
     Emitter<PermissionState> emit,
   ) async {
+    if (_requestInFlight) {
+      return;
+    }
+
+    _requestInFlight = true;
     emit(
       state.copyWith(status: PermissionFlowStatus.loading, clearError: true),
     );
 
     try {
       final PermissionSnapshot snapshot = await _requestPermissions();
+      final bool isReady = snapshot.isReady;
       emit(
         state.copyWith(
-          status: snapshot.isReady
+          status: isReady
               ? PermissionFlowStatus.ready
               : PermissionFlowStatus.actionRequired,
           snapshot: snapshot,
+          userConfirmedGrant: isReady,
           clearError: true,
         ),
       );
@@ -75,8 +89,11 @@ class PermissionBloc extends Bloc<PermissionEvent, PermissionState> {
         state.copyWith(
           status: PermissionFlowStatus.error,
           errorMessage: error.toString(),
+          userConfirmedGrant: false,
         ),
       );
+    } finally {
+      _requestInFlight = false;
     }
   }
 }

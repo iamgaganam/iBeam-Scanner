@@ -9,6 +9,7 @@ class PermissionState extends Equatable {
     required this.status,
     this.snapshot,
     this.errorMessage,
+    this.userConfirmedGrant = false,
   });
 
   const PermissionState.initial() : this(status: PermissionFlowStatus.initial);
@@ -16,22 +17,31 @@ class PermissionState extends Equatable {
   final PermissionFlowStatus status;
   final PermissionSnapshot? snapshot;
   final String? errorMessage;
+  final bool userConfirmedGrant;
 
   bool get isReady => status == PermissionFlowStatus.ready;
+  bool get canProceed => isReady && userConfirmedGrant;
 
   PermissionState copyWith({
     PermissionFlowStatus? status,
     PermissionSnapshot? snapshot,
     String? errorMessage,
+    bool? userConfirmedGrant,
     bool clearError = false,
   }) {
     return PermissionState(
       status: status ?? this.status,
       snapshot: snapshot ?? this.snapshot,
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
+      userConfirmedGrant: userConfirmedGrant ?? this.userConfirmedGrant,
     );
   }
 
   @override
-  List<Object?> get props => <Object?>[status, snapshot, errorMessage];
+  List<Object?> get props => <Object?>[
+    status,
+    snapshot,
+    errorMessage,
+    userConfirmedGrant,
+  ];
 }

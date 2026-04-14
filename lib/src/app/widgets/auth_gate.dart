@@ -46,7 +46,7 @@ class AuthGate extends StatelessWidget {
               return;
             }
 
-            if (state.isReady) {
+            if (state.canProceed) {
               context.read<BeaconScannerBloc>().add(
                 const BeaconScannerStartRequested(),
               );
@@ -61,29 +61,67 @@ class AuthGate extends StatelessWidget {
       child: BlocBuilder<AuthBloc, AuthState>(
         builder: (BuildContext context, AuthState authState) {
           if (authState.status == AuthStatus.initial || authState.isLoading) {
-            return const _GateLoading();
+            return const _GateSwitch(
+              stateKey: 'loading',
+              child: _GateLoading(),
+            );
           }
 
           if (!authState.isAuthenticated) {
-            return const LoginScreen();
+            return const _GateSwitch(stateKey: 'login', child: LoginScreen());
           }
 
           return BlocBuilder<PermissionBloc, PermissionState>(
             builder: (BuildContext context, PermissionState permissionState) {
               if (permissionState.status == PermissionFlowStatus.initial ||
                   permissionState.status == PermissionFlowStatus.loading) {
-                return const SetupPermissionScreen();
+                return const _GateSwitch(
+                  stateKey: 'setup_loading',
+                  child: SetupPermissionScreen(),
+                );
               }
 
-              if (permissionState.isReady) {
-                return const MainLayout();
+              if (permissionState.canProceed) {
+                return const _GateSwitch(stateKey: 'main', child: MainLayout());
               }
 
-              return const SetupPermissionScreen();
+              return const _GateSwitch(
+                stateKey: 'setup_required',
+                child: SetupPermissionScreen(),
+              );
             },
           );
         },
       ),
+    );
+  }
+}
+
+class _GateSwitch extends StatelessWidget {
+  const _GateSwitch({required this.stateKey, required this.child});
+
+  final String stateKey;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 320),
+      switchInCurve: Curves.easeOutCubic,
+      switchOutCurve: Curves.easeInCubic,
+      transitionBuilder: (Widget child, Animation<double> animation) {
+        return FadeTransition(
+          opacity: animation,
+          child: SlideTransition(
+            position: Tween<Offset>(
+              begin: const Offset(0, 0.03),
+              end: Offset.zero,
+            ).animate(animation),
+            child: child,
+          ),
+        );
+      },
+      child: KeyedSubtree(key: ValueKey<String>(stateKey), child: child),
     );
   }
 }

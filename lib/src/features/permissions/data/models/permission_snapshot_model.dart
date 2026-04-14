@@ -7,6 +7,8 @@ class PermissionSnapshotModel extends PermissionSnapshot {
     required super.bluetoothScanGranted,
     required super.bluetoothConnectGranted,
     required super.bluetoothGranted,
+    required super.locationPermissionPermanentlyDenied,
+    required super.bluetoothPermissionPermanentlyDenied,
     required super.locationServiceEnabled,
     required super.bluetoothServiceEnabled,
   });

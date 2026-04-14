@@ -129,6 +129,6 @@ Current status:
 
 ## Notes
 
-- UI design was preserved and connected to backend/state logic.
+- UI design and backend/state logic has been made.
 - If no physical beacon is available, scanner fallback simulation keeps the dashboard functional for demonstration.
 - Once a real iBeacon device is available, the real scanner path can be used without changing feature-layer code.

@@ -4,6 +4,7 @@ class CustomButton extends StatelessWidget {
   final String label;
   final VoidCallback onPressed;
   final IconData? icon;
+  final bool iconAtEnd;
   final Color backgroundColor;
   final Color foregroundColor;
   final bool outlined;
@@ -15,6 +16,7 @@ class CustomButton extends StatelessWidget {
     required this.label,
     required this.onPressed,
     this.icon,
+    this.iconAtEnd = false,
     this.backgroundColor = const Color(0xFF1E3A9F),
     this.foregroundColor = Colors.white,
     this.outlined = false,
@@ -66,14 +68,15 @@ class CustomButton extends StatelessWidget {
   }
 
   Widget _buildChild() {
+    final Widget? iconWidget =
+        customIcon ??
+        (icon != null ? Icon(icon, color: foregroundColor, size: 22) : null);
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        if (customIcon != null) ...[
-          customIcon!,
-          const SizedBox(width: 10),
-        ] else if (icon != null) ...[
-          Icon(icon, color: foregroundColor, size: 22),
+        if (!iconAtEnd && iconWidget != null) ...[
+          iconWidget,
           const SizedBox(width: 10),
         ],
         Text(
@@ -85,6 +88,10 @@ class CustomButton extends StatelessWidget {
             letterSpacing: 0.2,
           ),
         ),
+        if (iconAtEnd && iconWidget != null) ...[
+          const SizedBox(width: 10),
+          iconWidget,
+        ],
       ],
     );
   }

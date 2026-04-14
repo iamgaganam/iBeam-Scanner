@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/presentation/widgets/app_animated_entrance.dart';
 import '../../domain/entities/beacon_device.dart';
 import '../bloc/beacon_scanner_bloc.dart';
 import '../bloc/beacon_scanner_event.dart';
@@ -67,169 +68,183 @@ class _DashboardScreenState extends State<DashboardScreen>
                 padding: const EdgeInsets.only(bottom: 100),
                 child: Column(
                   children: [
-                    // Top Hero Section
-                    Container(
-                      color: Colors.white,
-                      width: double.infinity,
-                      padding: const EdgeInsets.fromLTRB(24, 32, 24, 32),
-                      child: Column(
-                        children: [
-                          // Animated Radar Icon
-                          _buildRadarIcon(),
-                          const SizedBox(height: 20),
-                          // Status label
-                          Text(
-                            _statusLabel(state),
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w700,
-                              color: _statusColor(state),
-                              letterSpacing: 1.4,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          // Title
-                          const Text(
-                            'Precision Scanning',
-                            style: TextStyle(
-                              fontSize: 28,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFF111111),
-                            ),
-                          ),
-                          const SizedBox(height: 10),
-                          // Subtitle
-                          Text(
-                            _subtitle(state),
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              fontSize: 14,
-                              color: Color(0xFF888888),
-                              height: 1.55,
-                            ),
-                          ),
-                          const SizedBox(height: 24),
-                          // Stats Row
-                          Row(
-                            children: [
-                              Expanded(
-                                child: _buildActiveNodesCard(state.activeNodes),
+                    AppAnimatedEntrance(
+                      delay: const Duration(milliseconds: 50),
+                      child: Container(
+                        color: Colors.white,
+                        width: double.infinity,
+                        padding: const EdgeInsets.fromLTRB(24, 32, 24, 32),
+                        child: Column(
+                          children: [
+                            _buildRadarIcon(),
+                            const SizedBox(height: 20),
+                            Text(
+                              _statusLabel(state),
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                                color: _statusColor(state),
+                                letterSpacing: 1.4,
                               ),
-                              const SizedBox(width: 14),
-                              Expanded(
-                                child: _buildRSSICard(state.strongestRssi),
+                            ),
+                            const SizedBox(height: 8),
+                            const Text(
+                              'Precision Scanning',
+                              style: TextStyle(
+                                fontSize: 28,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF111111),
                               ),
-                            ],
-                          ),
-                        ],
+                            ),
+                            const SizedBox(height: 10),
+                            Text(
+                              _subtitle(state),
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                fontSize: 14,
+                                color: Color(0xFF888888),
+                                height: 1.55,
+                              ),
+                            ),
+                            const SizedBox(height: 24),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: _buildActiveNodesCard(
+                                    state.activeNodes,
+                                  ),
+                                ),
+                                const SizedBox(width: 14),
+                                Expanded(
+                                  child: _buildRSSICard(state.strongestRssi),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
                     ),
 
                     const SizedBox(height: 16),
 
-                    // Detected Beacons Section
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Section header
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              const Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Detected Beacons',
-                                    style: TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold,
-                                      color: Color(0xFF111111),
-                                    ),
-                                  ),
-                                  SizedBox(height: 2),
-                                  Text(
-                                    'Nearby localized identifiers',
-                                    style: TextStyle(
-                                      fontSize: 13,
-                                      color: Color(0xFF888888),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const Spacer(),
-                              GestureDetector(
-                                onTap: () {
-                                  context.read<BeaconScannerBloc>().add(
-                                    const BeaconScannerRefreshRequested(),
-                                  );
-                                },
-                                child: const Row(
+                    AppAnimatedEntrance(
+                      delay: const Duration(milliseconds: 110),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                const Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      'REFRESH',
+                                      'Detected Beacons',
                                       style: TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w700,
-                                        color: Color(0xFF1E3A9F),
-                                        letterSpacing: 0.8,
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold,
+                                        color: Color(0xFF111111),
                                       ),
                                     ),
-                                    SizedBox(width: 4),
-                                    Icon(
-                                      Icons.refresh,
-                                      color: Color(0xFF1E3A9F),
-                                      size: 16,
+                                    SizedBox(height: 2),
+                                    Text(
+                                      'Nearby localized identifiers',
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        color: Color(0xFF888888),
+                                      ),
                                     ),
                                   ],
                                 ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 16),
+                                const Spacer(),
+                                GestureDetector(
+                                  onTap: () {
+                                    context.read<BeaconScannerBloc>().add(
+                                      const BeaconScannerRefreshRequested(),
+                                    );
+                                  },
+                                  child: const Row(
+                                    children: [
+                                      Text(
+                                        'REFRESH',
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w700,
+                                          color: Color(0xFF1E3A9F),
+                                          letterSpacing: 0.8,
+                                        ),
+                                      ),
+                                      SizedBox(width: 4),
+                                      Icon(
+                                        Icons.refresh,
+                                        color: Color(0xFF1E3A9F),
+                                        size: 16,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 16),
 
-                          if (beacons.isEmpty)
-                            _buildEmptyCard(state)
-                          else
-                            ...beacons.map(_buildBeaconCard),
-                        ],
+                            if (beacons.isEmpty)
+                              AppAnimatedEntrance(
+                                delay: const Duration(milliseconds: 180),
+                                child: _buildEmptyCard(state),
+                              )
+                            else
+                              ...beacons.asMap().entries.map((entry) {
+                                return AppAnimatedEntrance(
+                                  delay: Duration(
+                                    milliseconds: 180 + (entry.key * 45),
+                                  ),
+                                  child: _buildBeaconCard(entry.value),
+                                );
+                              }),
+                          ],
+                        ),
                       ),
                     ),
                   ],
                 ),
               ),
 
-              // FAB
               Positioned(
-                bottom: 20,
-                right: 20,
-                child: GestureDetector(
-                  onTap: () {
-                    context.read<BeaconScannerBloc>().add(
-                      const BeaconScannerStartRequested(),
-                    );
-                  },
-                  child: Container(
-                    width: 52,
-                    height: 52,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF1E3A9F),
-                      borderRadius: BorderRadius.circular(14),
-                      boxShadow: [
-                        BoxShadow(
-                          color: const Color(
-                            0xFF1E3A9F,
-                          ).withValues(alpha: 0.35),
-                          blurRadius: 12,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: const Icon(
-                      Icons.play_arrow,
-                      color: Colors.white,
-                      size: 26,
+                bottom: 24,
+                right: 24,
+                child: AppAnimatedEntrance(
+                  delay: const Duration(milliseconds: 220),
+                  beginOffset: const Offset(0, 0.08),
+                  beginScale: 0.9,
+                  child: GestureDetector(
+                    onTap: () {
+                      context.read<BeaconScannerBloc>().add(
+                        const BeaconScannerStartRequested(),
+                      );
+                    },
+                    child: Container(
+                      width: 60,
+                      height: 60,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF1E3A9F),
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(
+                              0xFF1E3A9F,
+                            ).withValues(alpha: 0.4),
+                            blurRadius: 16,
+                            offset: const Offset(0, 6),
+                          ),
+                        ],
+                      ),
+                      child: const Icon(
+                        Icons.add,
+                        color: Colors.white,
+                        size: 32,
+                      ),
                     ),
                   ),
                 ),
@@ -248,7 +263,6 @@ class _DashboardScreenState extends State<DashboardScreen>
         return Stack(
           alignment: Alignment.center,
           children: [
-            // Outer pulse ring
             Transform.scale(
               scale: _pulseAnimation.value,
               child: Container(
@@ -260,7 +274,6 @@ class _DashboardScreenState extends State<DashboardScreen>
                 ),
               ),
             ),
-            // Inner navy circle
             Container(
               width: 72,
               height: 72,
@@ -409,7 +422,6 @@ class _DashboardScreenState extends State<DashboardScreen>
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Name + UUID
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -433,7 +445,6 @@ class _DashboardScreenState extends State<DashboardScreen>
                     ],
                   ),
                 ),
-                // Distance + Critical badge
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
@@ -479,7 +490,6 @@ class _DashboardScreenState extends State<DashboardScreen>
             const SizedBox(height: 10),
             Row(
               children: [
-                // Major ID
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -504,7 +514,6 @@ class _DashboardScreenState extends State<DashboardScreen>
                   ],
                 ),
                 const SizedBox(width: 24),
-                // Minor ID
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -529,7 +538,6 @@ class _DashboardScreenState extends State<DashboardScreen>
                   ],
                 ),
                 const Spacer(),
-                // Critical badge or signal icon
                 if (isCritical)
                   Container(
                     padding: const EdgeInsets.symmetric(

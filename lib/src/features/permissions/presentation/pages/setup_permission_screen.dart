@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/presentation/widgets/app_animated_entrance.dart';
 import '../../../../core/presentation/widgets/custom_button.dart';
 import '../bloc/permission_bloc.dart';
 import '../bloc/permission_event.dart';
@@ -79,62 +80,68 @@ class _SetupPermissionScreenState extends State<SetupPermissionScreen> {
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
                                 const SizedBox(height: 24),
-
-                                // Radar Icon Card
-                                _buildRadarCard(),
+                                AppAnimatedEntrance(
+                                  delay: const Duration(milliseconds: 60),
+                                  child: _buildRadarCard(),
+                                ),
 
                                 const SizedBox(height: 40),
-
-                                // Title
-                                const Text(
-                                  'Precision is key',
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    fontSize: 28,
-                                    fontWeight: FontWeight.bold,
-                                    color: Color(0xFF111111),
+                                const AppAnimatedEntrance(
+                                  delay: Duration(milliseconds: 120),
+                                  child: Text(
+                                    'Precision is key',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontSize: 28,
+                                      fontWeight: FontWeight.bold,
+                                      color: Color(0xFF111111),
+                                    ),
                                   ),
                                 ),
 
                                 const SizedBox(height: 14),
-
-                                // Subtitle
-                                const Text(
-                                  'To accurately detect proximity and keep your environment secure, we need a few keys to the kingdom.',
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    fontSize: 15,
-                                    color: Color(0xFF888888),
-                                    height: 1.6,
+                                const AppAnimatedEntrance(
+                                  delay: Duration(milliseconds: 160),
+                                  child: Text(
+                                    'To accurately detect proximity and keep your environment secure, we need a few keys to the kingdom.',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontSize: 15,
+                                      color: Color(0xFF888888),
+                                      height: 1.6,
+                                    ),
                                   ),
                                 ),
 
                                 const SizedBox(height: 36),
-
-                                // Location Toggle
-                                _buildToggleCard(
-                                  title: 'Enable Location Services (Always)',
-                                  subtitle: 'Required for background awareness',
-                                  value: locationEnabled,
-                                  onChanged: (_) {
-                                    context.read<PermissionBloc>().add(
-                                      const PermissionRequestSubmitted(),
-                                    );
-                                  },
+                                AppAnimatedEntrance(
+                                  delay: const Duration(milliseconds: 220),
+                                  child: _buildToggleCard(
+                                    title: 'Enable Location Services (Always)',
+                                    subtitle:
+                                        'Required for background awareness',
+                                    value: locationEnabled,
+                                    onChanged: (_) {
+                                      context.read<PermissionBloc>().add(
+                                        const PermissionRequestSubmitted(),
+                                      );
+                                    },
+                                  ),
                                 ),
 
                                 const SizedBox(height: 12),
-
-                                // Bluetooth Toggle
-                                _buildToggleCard(
-                                  title: 'Enable Bluetooth Scan',
-                                  subtitle: 'Detects nearby trusted devices',
-                                  value: bluetoothEnabled,
-                                  onChanged: (_) {
-                                    context.read<PermissionBloc>().add(
-                                      const PermissionRequestSubmitted(),
-                                    );
-                                  },
+                                AppAnimatedEntrance(
+                                  delay: const Duration(milliseconds: 260),
+                                  child: _buildToggleCard(
+                                    title: 'Enable Bluetooth Scan',
+                                    subtitle: 'Detects nearby trusted devices',
+                                    value: bluetoothEnabled,
+                                    onChanged: (_) {
+                                      context.read<PermissionBloc>().add(
+                                        const PermissionRequestSubmitted(),
+                                      );
+                                    },
+                                  ),
                                 ),
 
                                 const SizedBox(height: 28),
@@ -142,51 +149,51 @@ class _SetupPermissionScreenState extends State<SetupPermissionScreen> {
                             ),
                           ),
                         ),
+                        AppAnimatedEntrance(
+                          delay: const Duration(milliseconds: 300),
+                          beginOffset: const Offset(0, 0.03),
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(24, 0, 24, 8),
+                            child: Column(
+                              children: [
+                                CustomButton(
+                                  label: 'Grant Permission',
+                                  backgroundColor: const Color(0xFF1E3A9F),
+                                  foregroundColor: Colors.white,
+                                  icon: Icons.arrow_forward_rounded,
+                                  iconAtEnd: true,
+                                  onPressed: () {
+                                    context.read<PermissionBloc>().add(
+                                      const PermissionRequestSubmitted(),
+                                    );
+                                  },
+                                ),
 
-                        // Bottom section
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(24, 0, 24, 8),
-                          child: Column(
-                            children: [
-                              // Grant Permissions Button
-                              CustomButton(
-                                label: 'Grant Permissions',
-                                backgroundColor: const Color(0xFF1E3A9F),
-                                foregroundColor: Colors.white,
-                                icon: Icons.arrow_forward,
-                                onPressed: () {
-                                  context.read<PermissionBloc>().add(
-                                    const PermissionRequestSubmitted(),
-                                  );
-                                },
-                              ),
-
-                              const SizedBox(height: 16),
-
-                              // Encrypted label
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: const [
-                                  Icon(
-                                    Icons.lock_outline,
-                                    size: 13,
-                                    color: Color(0xFFAAAAAA),
-                                  ),
-                                  SizedBox(width: 6),
-                                  Text(
-                                    'DATA IS ENCRYPTED AND STORED LOCALLY',
-                                    style: TextStyle(
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.w600,
+                                const SizedBox(height: 16),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: const [
+                                    Icon(
+                                      Icons.lock_outline,
+                                      size: 13,
                                       color: Color(0xFFAAAAAA),
-                                      letterSpacing: 1.1,
                                     ),
-                                  ),
-                                ],
-                              ),
+                                    SizedBox(width: 6),
+                                    Text(
+                                      'DATA IS ENCRYPTED AND STORED LOCALLY',
+                                      style: TextStyle(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w600,
+                                        color: Color(0xFFAAAAAA),
+                                        letterSpacing: 1.1,
+                                      ),
+                                    ),
+                                  ],
+                                ),
 
-                              const SizedBox(height: 12),
-                            ],
+                                const SizedBox(height: 12),
+                              ],
+                            ),
                           ),
                         ),
                       ],
@@ -293,35 +300,25 @@ class _RadarIconPainter extends CustomPainter {
     final center = Offset(size.width / 2, size.height / 2);
     const navyColor = Color(0xFF1E3A9F);
     const lightCircleColor = Color(0xFFD0D4E8);
-
-    // Outer light circle
     final outerPaint = Paint()
       ..color = lightCircleColor
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.0;
     canvas.drawCircle(center, size.width * 0.48, outerPaint);
-
-    // Middle navy circle
     final midPaint = Paint()
       ..color = navyColor
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.5;
     canvas.drawCircle(center, size.width * 0.33, midPaint);
-
-    // Inner navy circle (filled slightly)
     final innerPaint = Paint()
       ..color = navyColor
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.5;
     canvas.drawCircle(center, size.width * 0.18, innerPaint);
-
-    // Location pin dot at center
     final dotPaint = Paint()
       ..color = navyColor
       ..style = PaintingStyle.fill;
     canvas.drawCircle(center, size.width * 0.055, dotPaint);
-
-    // Diagonal line (like a search/scan indicator)
     final linePaint = Paint()
       ..color = navyColor
       ..strokeWidth = 2.5

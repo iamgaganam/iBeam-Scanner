@@ -7,6 +7,8 @@ class PermissionSnapshot extends Equatable {
     required this.bluetoothScanGranted,
     required this.bluetoothConnectGranted,
     required this.bluetoothGranted,
+    required this.locationPermissionPermanentlyDenied,
+    required this.bluetoothPermissionPermanentlyDenied,
     required this.locationServiceEnabled,
     required this.bluetoothServiceEnabled,
   });
@@ -16,8 +18,14 @@ class PermissionSnapshot extends Equatable {
   final bool bluetoothScanGranted;
   final bool bluetoothConnectGranted;
   final bool bluetoothGranted;
+  final bool locationPermissionPermanentlyDenied;
+  final bool bluetoothPermissionPermanentlyDenied;
   final bool locationServiceEnabled;
   final bool bluetoothServiceEnabled;
+
+  bool get hasPermanentlyDeniedPermission =>
+      locationPermissionPermanentlyDenied ||
+      bluetoothPermissionPermanentlyDenied;
 
   bool get hasLocationPermission =>
       locationWhenInUseGranted && locationAlwaysGranted;
@@ -38,6 +46,8 @@ class PermissionSnapshot extends Equatable {
     bluetoothScanGranted,
     bluetoothConnectGranted,
     bluetoothGranted,
+    locationPermissionPermanentlyDenied,
+    bluetoothPermissionPermanentlyDenied,
     locationServiceEnabled,
     bluetoothServiceEnabled,
   ];

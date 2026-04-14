@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../../../core/presentation/widgets/app_animated_entrance.dart';
 import '../../../../core/presentation/widgets/custom_button.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
@@ -49,73 +51,58 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: SingleChildScrollView(
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            const SizedBox(height: 72),
+                        child: AppAnimatedEntrance(
+                          delay: const Duration(milliseconds: 70),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              const SizedBox(height: 72),
+                              _buildAppIcon(),
 
-                            // App Icon
-                            _buildAppIcon(),
-
-                            const SizedBox(height: 40),
-
-                            // Title
-                            const Text(
-                              'Welcome to Proximity\nAware',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: 30,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFF111111),
-                                height: 1.25,
+                              const SizedBox(height: 40),
+                              const Text(
+                                'Welcome to Proximity\nAware',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 30,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF111111),
+                                  height: 1.25,
+                                ),
                               ),
-                            ),
 
-                            const SizedBox(height: 14),
-
-                            // Subtitle
-                            const Text(
-                              'Stay connected with precision location\ntracking and real-time proximity alerts.',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: 15,
-                                color: Color(0xFF888888),
-                                height: 1.55,
+                              const SizedBox(height: 14),
+                              const Text(
+                                'Stay connected with precision location\ntracking and real-time proximity alerts.',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  color: Color(0xFF888888),
+                                  height: 1.55,
+                                ),
                               ),
-                            ),
 
-                            const SizedBox(height: 48),
+                              const SizedBox(height: 48),
+                              _buildAppleButton(isLoading),
 
-                            // Sign in with Apple
-                            _buildAppleButton(isLoading),
+                              const SizedBox(height: 14),
+                              _buildGoogleButton(isLoading),
 
-                            const SizedBox(height: 14),
+                              const SizedBox(height: 32),
+                              _buildDivider(),
 
-                            // Sign in with Google
-                            _buildGoogleButton(isLoading),
+                              const SizedBox(height: 24),
+                              _buildEmailField(),
 
-                            const SizedBox(height: 32),
+                              const SizedBox(height: 20),
+                              _buildFirebaseBadge(),
 
-                            // OR ACCESS VIA divider
-                            _buildDivider(),
+                              const SizedBox(height: 48),
+                              _buildTermsText(),
 
-                            const SizedBox(height: 24),
-
-                            // Email input
-                            _buildEmailField(),
-
-                            const SizedBox(height: 20),
-
-                            // Secure Firebase SSO badge
-                            _buildFirebaseBadge(),
-
-                            const SizedBox(height: 48),
-
-                            // Terms & Privacy
-                            _buildTermsText(),
-
-                            const SizedBox(height: 32),
-                          ],
+                              const SizedBox(height: 32),
+                            ],
+                          ),
                         ),
                       ),
                     ),
@@ -202,10 +189,11 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Widget _buildGoogleLogo() {
-    return SizedBox(
-      width: 22,
-      height: 22,
-      child: CustomPaint(painter: _GoogleLogoPainter()),
+    return SvgPicture.string(
+      _googleLogoSvg,
+      width: 20,
+      height: 20,
+      semanticsLabel: 'Google logo',
     );
   }
 
@@ -361,57 +349,11 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 }
 
-class _GoogleLogoPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final double cx = size.width / 2;
-    final double cy = size.height / 2;
-    final double r = size.width / 2;
-
-    // Blue arc (top-right to bottom-right)
-    final paintBlue = Paint()
-      ..color = const Color(0xFF4285F4)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = size.width * 0.18
-      ..strokeCap = StrokeCap.round;
-
-    // Red arc (top-left)
-    final paintRed = Paint()
-      ..color = const Color(0xFFEA4335)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = size.width * 0.18
-      ..strokeCap = StrokeCap.round;
-
-    // Yellow arc (bottom)
-    final paintYellow = Paint()
-      ..color = const Color(0xFFFBBC05)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = size.width * 0.18
-      ..strokeCap = StrokeCap.round;
-
-    // Green arc (bottom-left to top-left)
-    final paintGreen = Paint()
-      ..color = const Color(0xFF34A853)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = size.width * 0.18
-      ..strokeCap = StrokeCap.round;
-
-    final rect = Rect.fromCircle(center: Offset(cx, cy), radius: r * 0.78);
-
-    canvas.drawArc(rect, -0.52, 1.57, false, paintBlue);
-    canvas.drawArc(rect, 1.05, 1.2, false, paintYellow);
-    canvas.drawArc(rect, 2.25, 1.46, false, paintGreen);
-    canvas.drawArc(rect, -2.09, 1.57, false, paintRed);
-
-    // Horizontal bar of G
-    final barPaint = Paint()
-      ..color = const Color(0xFF4285F4)
-      ..strokeWidth = size.width * 0.18
-      ..strokeCap = StrokeCap.round;
-
-    canvas.drawLine(Offset(cx, cy), Offset(cx + r * 0.78, cy), barPaint);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
+const String _googleLogoSvg = '''
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18">
+  <path fill="#EA4335" d="M9 3.48c1.69 0 2.84.73 3.49 1.34l2.54-2.54C13.51.86 11.42 0 9 0 5.48 0 2.44 2.02.96 4.96l2.96 2.3C4.65 5.09 6.64 3.48 9 3.48z"/>
+  <path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84c-.21 1.12-.84 2.07-1.79 2.71l2.84 2.2c1.66-1.53 2.75-3.78 2.75-6.55z"/>
+  <path fill="#FBBC05" d="M3.92 10.74A5.41 5.41 0 013.64 9c0-.6.1-1.18.28-1.74L.96 4.96A8.99 8.99 0 000 9c0 1.45.35 2.82.96 4.04l2.96-2.3z"/>
+  <path fill="#34A853" d="M9 18c2.42 0 4.45-.8 5.94-2.16l-2.84-2.2c-.79.53-1.8.84-3.1.84-2.36 0-4.35-1.59-5.08-3.74l-2.96 2.3C2.44 15.98 5.48 18 9 18z"/>
+</svg>
+''';

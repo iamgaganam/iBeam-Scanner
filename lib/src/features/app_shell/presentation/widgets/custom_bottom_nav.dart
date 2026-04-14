@@ -72,10 +72,15 @@ class CustomBottomNav extends StatelessWidget {
             Stack(
               clipBehavior: Clip.none,
               children: [
-                Icon(
-                  isActive ? activeIcon : icon,
-                  color: isActive ? Colors.white : const Color(0xFF888888),
-                  size: 22,
+                AnimatedScale(
+                  duration: const Duration(milliseconds: 220),
+                  curve: Curves.easeOutBack,
+                  scale: isActive ? 1.08 : 1,
+                  child: Icon(
+                    isActive ? activeIcon : icon,
+                    color: isActive ? Colors.white : const Color(0xFF888888),
+                    size: 22,
+                  ),
                 ),
                 if (label == 'ALERTS' && !isActive)
                   Positioned(

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/presentation/widgets/app_animated_entrance.dart';
 import '../../../../core/presentation/widgets/custom_button.dart';
+import '../../../../core/presentation/widgets/user_profile_avatar.dart';
 import '../../../../core/presentation/widgets/stat_card.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_event.dart';
@@ -17,6 +19,7 @@ class SettingsScreen extends StatelessWidget {
 
     final String displayName = authState.user?.displayName ?? 'Operator';
     final String email = authState.user?.email ?? 'No email linked';
+    final String userId = authState.user?.id ?? 'user';
     final String signalHealth = _signalHealth(beaconState.strongestRssi);
 
     return Scaffold(
@@ -24,147 +27,138 @@ class SettingsScreen extends StatelessWidget {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // White top section
-            Container(
-              color: Colors.white,
-              width: double.infinity,
-              padding: const EdgeInsets.fromLTRB(24, 28, 24, 28),
-              child: Column(
-                children: [
-                  // Avatar with gold ring and shield badge
-                  _buildAvatar(),
-                  const SizedBox(height: 16),
-                  // Name
-                  Text(
-                    displayName,
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF111111),
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  // Email
-                  Text(
-                    email,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: Color(0xFF888888),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  // Stats Row
-                  Row(
-                    children: [
-                      Expanded(
-                        child: StatCard(
-                          label: 'ACTIVE NODES',
-                          value: '${beaconState.activeNodes}',
-                          valueColor: const Color(0xFF1E3A9F),
-                        ),
+            AppAnimatedEntrance(
+              delay: const Duration(milliseconds: 60),
+              child: Container(
+                color: Colors.white,
+                width: double.infinity,
+                padding: const EdgeInsets.fromLTRB(24, 28, 24, 28),
+                child: Column(
+                  children: [
+                    _buildAvatar(userId),
+                    const SizedBox(height: 16),
+                    Text(
+                      displayName,
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF111111),
                       ),
-                      const SizedBox(width: 14),
-                      Expanded(
-                        child: StatCard(
-                          label: 'SIGNAL HEALTH',
-                          value: signalHealth,
-                          valueColor: const Color(0xFF8B6F00),
-                        ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      email,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Color(0xFF888888),
                       ),
-                    ],
-                  ),
-                ],
+                    ),
+                    const SizedBox(height: 24),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: StatCard(
+                            label: 'ACTIVE NODES',
+                            value: '${beaconState.activeNodes}',
+                            valueColor: const Color(0xFF1E3A9F),
+                          ),
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: StatCard(
+                            label: 'SIGNAL HEALTH',
+                            value: signalHealth,
+                            valueColor: const Color(0xFF8B6F00),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
 
             const SizedBox(height: 16),
 
-            // Configuration Section
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'CONFIGURATION',
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF888888),
-                      letterSpacing: 1.3,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-
-                  // Config Cards
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: const Color(0xFFE8E7E3)),
-                    ),
-                    child: Column(
-                      children: [
-                        _buildConfigItem(
-                          icon: Icons.notifications_active_outlined,
-                          title: 'Notification Preferences',
-                          subtitle: 'Manage proximity alerts and system logs',
-                          isFirst: true,
-                        ),
-                        _buildDivider(),
-                        _buildConfigItem(
-                          icon: Icons.wifi_tethering,
-                          title: 'iBeacon Protocol Specs',
-                          subtitle: 'UUID, Major, and Minor broadcast settings',
-                        ),
-                        _buildDivider(),
-                        _buildConfigItem(
-                          icon: Icons.bar_chart_outlined,
-                          title: 'Distance Algorithm Explanation',
-                          subtitle: 'RSSI path loss model and trilateration',
-                          isLast: true,
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  // Background Scan Active Banner
-                  _buildScanBanner(),
-
-                  const SizedBox(height: 16),
-
-                  // Sign Out Button
-                  CustomButton(
-                    label: 'Sign Out',
-                    icon: Icons.logout,
-                    backgroundColor: const Color(0xFFFFEDED),
-                    foregroundColor: const Color(0xFFCC2222),
-                    onPressed: () {
-                      context.read<AuthBloc>().add(
-                        const AuthSignOutRequested(),
-                      );
-                    },
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  // Version
-                  const Center(
-                    child: Text(
-                      'VERSION 4.2.0-STABLE',
+            AppAnimatedEntrance(
+              delay: const Duration(milliseconds: 130),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'CONFIGURATION',
                       style: TextStyle(
                         fontSize: 11,
-                        color: Color(0xFFAAAAAA),
-                        letterSpacing: 1.1,
-                        fontWeight: FontWeight.w500,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF888888),
+                        letterSpacing: 1.3,
                       ),
                     ),
-                  ),
+                    const SizedBox(height: 12),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: const Color(0xFFE8E7E3)),
+                      ),
+                      child: Column(
+                        children: [
+                          _buildConfigItem(
+                            icon: Icons.notifications_active_outlined,
+                            title: 'Notification Preferences',
+                            subtitle: 'Manage proximity alerts and system logs',
+                          ),
+                          _buildDivider(),
+                          _buildConfigItem(
+                            icon: Icons.wifi_tethering,
+                            title: 'iBeacon Protocol Specs',
+                            subtitle:
+                                'UUID, Major, and Minor broadcast settings',
+                          ),
+                          _buildDivider(),
+                          _buildConfigItem(
+                            icon: Icons.bar_chart_outlined,
+                            title: 'Distance Algorithm Explanation',
+                            subtitle: 'RSSI path loss model and trilateration',
+                          ),
+                        ],
+                      ),
+                    ),
 
-                  const SizedBox(height: 24),
-                ],
+                    const SizedBox(height: 16),
+                    _buildScanBanner(),
+
+                    const SizedBox(height: 16),
+                    CustomButton(
+                      label: 'Sign Out',
+                      icon: Icons.logout,
+                      backgroundColor: const Color(0xFFFFEDED),
+                      foregroundColor: const Color(0xFFCC2222),
+                      onPressed: () {
+                        context.read<AuthBloc>().add(
+                          const AuthSignOutRequested(),
+                        );
+                      },
+                    ),
+
+                    const SizedBox(height: 16),
+                    const Center(
+                      child: Text(
+                        'VERSION 4.2.0-STABLE',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: Color(0xFFAAAAAA),
+                          letterSpacing: 1.1,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 24),
+                  ],
+                ),
               ),
             ),
           ],
@@ -184,11 +178,10 @@ class SettingsScreen extends StatelessWidget {
     return '$percent%';
   }
 
-  Widget _buildAvatar() {
+  Widget _buildAvatar(String userId) {
     return Stack(
       clipBehavior: Clip.none,
       children: [
-        // Gold gradient ring
         Container(
           width: 94,
           height: 94,
@@ -210,16 +203,9 @@ class SettingsScreen extends StatelessWidget {
               color: Colors.white,
             ),
             padding: const EdgeInsets.all(2),
-            child: CircleAvatar(
-              radius: 42,
-              backgroundColor: const Color(0xFF5BBDBD),
-              child: ClipOval(
-                child: Icon(Icons.person, size: 56, color: Colors.white),
-              ),
-            ),
+            child: UserProfileAvatar(userId: userId, radius: 42, iconSize: 56),
           ),
         ),
-        // Shield badge
         Positioned(
           bottom: 0,
           right: 0,
@@ -245,8 +231,6 @@ class SettingsScreen extends StatelessWidget {
     required IconData icon,
     required String title,
     required String subtitle,
-    bool isFirst = false,
-    bool isLast = false,
   }) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),

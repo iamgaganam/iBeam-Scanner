@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/presentation/widgets/app_animated_entrance.dart';
 import '../../domain/entities/proximity_alert.dart';
 import '../bloc/alerts_bloc.dart';
 import '../bloc/alerts_event.dart';
@@ -84,28 +85,36 @@ class _RefinedAlertsScreenState extends State<RefinedAlertsScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 20),
             child: Column(
               children: [
-                _buildStatsRow(alerts),
+                AppAnimatedEntrance(
+                  delay: const Duration(milliseconds: 60),
+                  child: _buildStatsRow(alerts),
+                ),
                 const SizedBox(height: 20),
-                ...alerts.map((ProximityAlert alert) {
+                ...alerts.asMap().entries.map((entry) {
+                  final int index = entry.key;
+                  final ProximityAlert alert = entry.value;
                   final _AlertVisual visual = _resolveVisual(alert);
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 14),
-                    child: _buildAlertCard(
-                      tag: alert.type,
-                      title: alert.title,
-                      description: alert.body,
-                      tagIcon: visual.icon,
-                      tagIconBg: visual.iconBackground,
-                      tagIconColor: visual.iconColor,
-                      leftBorderColor: visual.borderColor,
-                      metricLabel: _metricLabel(alert.type),
-                      metricValue: _metricValue(alert),
-                      metricValueColor: visual.metricColor,
-                      threshold: _thresholdText(alert),
-                      uuid: alert.uuid,
-                      buttonLabel: _buttonLabel(alert.action),
-                      buttonColor: visual.buttonColor,
-                      buttonTextColor: visual.buttonTextColor,
+                  return AppAnimatedEntrance(
+                    delay: Duration(milliseconds: 130 + (index * 45)),
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 14),
+                      child: _buildAlertCard(
+                        tag: alert.type,
+                        title: alert.title,
+                        description: alert.body,
+                        tagIcon: visual.icon,
+                        tagIconBg: visual.iconBackground,
+                        tagIconColor: visual.iconColor,
+                        leftBorderColor: visual.borderColor,
+                        metricLabel: _metricLabel(alert.type),
+                        metricValue: _metricValue(alert),
+                        metricValueColor: visual.metricColor,
+                        threshold: _thresholdText(alert),
+                        uuid: alert.uuid,
+                        buttonLabel: _buttonLabel(alert.action),
+                        buttonColor: visual.buttonColor,
+                        buttonTextColor: visual.buttonTextColor,
+                      ),
                     ),
                   );
                 }),
@@ -231,7 +240,7 @@ class _RefinedAlertsScreenState extends State<RefinedAlertsScreen> {
         border: Border(left: BorderSide(color: leftBorderColor, width: 4)),
       ),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(14, 16, 16, 16),
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -247,28 +256,32 @@ class _RefinedAlertsScreenState extends State<RefinedAlertsScreen> {
                   child: Icon(tagIcon, color: tagIconColor, size: 18),
                 ),
                 const SizedBox(width: 12),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      tag,
-                      style: const TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFF888888),
-                        letterSpacing: 0.8,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        tag,
+                        style: const TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF888888),
+                          letterSpacing: 0.8,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 1),
-                    Text(
-                      title,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF111111),
+                      const SizedBox(height: 1),
+                      Text(
+                        title,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF111111),
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ],
             ),

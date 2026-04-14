@@ -57,24 +57,29 @@ class LocalNotificationService {
       await initialize();
     }
 
-    const NotificationDetails details = NotificationDetails(
-      android: AndroidNotificationDetails(
-        'proximity_alerts_channel',
-        'Proximity Alerts',
-        channelDescription: 'Notifications for nearby iBeacon proximity events',
-        importance: Importance.max,
-        priority: Priority.high,
-      ),
-      iOS: DarwinNotificationDetails(),
-      macOS: DarwinNotificationDetails(),
-    );
+    try {
+      const NotificationDetails details = NotificationDetails(
+        android: AndroidNotificationDetails(
+          'proximity_alerts_channel',
+          'Proximity Alerts',
+          channelDescription:
+              'Notifications for nearby iBeacon proximity events',
+          importance: Importance.max,
+          priority: Priority.high,
+        ),
+        iOS: DarwinNotificationDetails(),
+        macOS: DarwinNotificationDetails(),
+      );
 
-    await _plugin.show(
-      id: id,
-      title: title,
-      body: body,
-      notificationDetails: details,
-      payload: payload,
-    );
+      await _plugin.show(
+        id: id,
+        title: title,
+        body: body,
+        notificationDetails: details,
+        payload: payload,
+      );
+    } catch (e) {
+      // Notification delivery failed silently, app continues normally
+    }
   }
 }

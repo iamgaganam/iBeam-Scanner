@@ -55,9 +55,13 @@ class _MainLayoutState extends State<MainLayout>
 
   @override
   Widget build(BuildContext context) {
+    final authState = context.watch<AuthBloc>().state;
+    final String userId = authState.user?.id ?? 'user';
+
     return Scaffold(
       appBar: CustomAppBar(
         currentIndex: _currentIndex,
+        userId: userId,
         onTapTab: _onTabChanged,
         onLogout: () {
           context.read<AuthBloc>().add(const AuthSignOutRequested());
